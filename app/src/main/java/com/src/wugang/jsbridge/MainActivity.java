@@ -6,6 +6,7 @@ import android.util.Log;
 import android.webkit.WebView;
 import android.widget.Toast;
 import com.wugang.jsbridge.library.JsCallback;
+import com.wugang.jsbridge.library.JsPlugin;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     webView.loadUrl("file:///android_asset/test.html");
   }
 
-  public class A {
+  public class A implements JsPlugin{
     public void jsCall(WebView webView, int data, final JsCallback jsCallback,
         final JsCallback jc) {
       Toast.makeText(webView.getContext(), data + "--", 1).show();
