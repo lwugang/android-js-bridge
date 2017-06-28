@@ -4,7 +4,8 @@ plugins {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.lwugang'
+group = 'com.github.lwugang'
+version = '1.0'
 
 android {
   compileSdkVersion 26
