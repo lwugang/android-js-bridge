@@ -198,22 +198,4 @@ public class JsCallJava {
     Log.d(TAG, mInjectedName + " call json: " + reqJson + " result:" + resStr);
     return resStr;
   }
-
-  class Callback implements ReturnValueCallback {
-    private final JsPromptResult result;
-    String jsonStr;
-
-    public Callback(String jsonStr, JsPromptResult result) {
-      this.jsonStr = jsonStr;
-      this.result = result;
-    }
-
-    @Override public void onCallback(Object object) {
-      result.confirm(getReturn(jsonStr, 200, object));
-    }
-
-    @Override public void onCallback() {
-      result.confirm(getReturn(jsonStr, 200, null));
-    }
-  }
 }
