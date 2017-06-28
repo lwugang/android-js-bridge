@@ -1,0 +1,17 @@
+<html>
+    <script>
+    windwo.android ={};
+        function callAndroid(){
+            android.jsCall(2048,function(s){
+                alert(s);
+                android.setHtml(document.getElementsByTagName('html')[0].innerHTML);
+            },function(){
+                alert("error");
+            });
+
+        }
+    </script>
+    <body>
+        <button onclick="callAndroid()">call android</button>
+    </body>
+</html>
