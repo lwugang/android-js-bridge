@@ -1,11 +1,7 @@
-plugins {
-  id "com.github.dcendents.android-maven" version "1.5"
-}
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'android-maven'
 
-group = 'com.github.lwugang'
-version = '1.0'
+group='com.github.lwugang'
 
 android {
   compileSdkVersion 26
