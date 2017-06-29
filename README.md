@@ -56,7 +56,7 @@ Add the dependency
 
         public void test(int data, JSFunction function) {
           Toast.makeText(getApplicationContext(), data + "--", 1).show();
-          //返回值方式 只针对sdk 19以上使用
+          //返回值方式 高低版本都可以使用
           function.execute(new JsReturnValueCallback() {
             @Override public void onReturnValue(String result) {
               Toast.makeText(getApplicationContext(),  "return value--"+result, 1).show();

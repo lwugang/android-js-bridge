@@ -1,5 +1,6 @@
 package com.wugang.jsbridge.library;
 
+import android.annotation.SuppressLint;
 import android.util.ArrayMap;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -7,6 +8,7 @@ import android.webkit.WebView;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,11 +87,11 @@ public class JsCallJava {
   public Map<String, Object> objectMap;
 
   //返回值回调队列
-  private Map<String,JSFunction> arrayMap;
+  private Map<String, JSFunction> arrayMap;
 
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
-    bridgeWebView.addJavascriptInterface(this,JSFunction.INJECT_OBJ_NAME);
+    bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
     if (objectMap == null) objectMap = new HashMap<>();
     objectMap.put(name, obj);
   }
@@ -97,15 +99,15 @@ public class JsCallJava {
   /**
    * javascript 返回结果
    */
-  @JavascriptInterface public void returnValue(String callbackId,String result) {
-      JsReturnValueCallback returnValueCallback = arrayMap.get(callbackId).returnValueCallback;
-      if(returnValueCallback!=null) {
-        returnValueCallback.onReturnValue(result);
-        arrayMap.remove(callbackId);
-      }
+  @JavascriptInterface public void returnValue(String callbackId, String result) {
+    JsReturnValueCallback returnValueCallback = arrayMap.get(callbackId).returnValueCallback;
+    if (returnValueCallback != null) {
+      returnValueCallback.onReturnValue(result);
+      arrayMap.remove(callbackId);
+    }
   }
 
-  public void onPageStarted(final WebView view, String url) {
+  @SuppressLint("WrongConstant") public void onPageStarted(final WebView view, String url) {
     final StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
       sb.append("EasyJS.inject('");
@@ -113,10 +115,12 @@ public class JsCallJava {
       sb.append("', [");
       Method[] methods = entry.getValue().getClass().getDeclaredMethods();
       for (int i = 0; i < methods.length; i++) {
+        //只注入public方法
+        if (methods[i].getModifiers() != Modifier.PUBLIC) continue;
         sb.append("\"");
         sb.append(methods[i].getName());
         sb.append("\"");
-        if(i!=(methods.length-1)){
+        if (i != (methods.length - 1)) {
           sb.append(",");
         }
       }
@@ -127,7 +131,7 @@ public class JsCallJava {
         view.loadUrl("javascript:" + INJECT_JS);
         view.loadUrl("javascript:" + sb.toString());
       }
-    },20);
+    }, 20);
   }
 
   public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -142,26 +146,26 @@ public class JsCallJava {
       try {
         List<Object> javaMethodParams = new ArrayList<>();
 
-        if(strings.length>3){//表示有参数
+        if (strings.length > 3) {//表示有参数
           String[] args = URLDecoder.decode(strings[3], "UTF-8").split(":");
-          for (int i = 0, j = 0, l = args.length; i < l; i+=2, j++){
+          for (int i = 0, j = 0, l = args.length; i < l; i += 2, j++) {
 
             String argsType = args[i];
-            String argsValue = args[i+1];
+            String argsValue = args[i + 1];
 
-            if ("f".equals(argsType)){//f 表示这个参数是一个函数
+            if ("f".equals(argsType)) {//f 表示这个参数是一个函数
               JSFunction func = new JSFunction();
               javaMethodParams.add(func);
-              if(arrayMap==null) arrayMap = new HashMap<>();
+              if (arrayMap == null) arrayMap = new HashMap<>();
               String key = new String(Base64.encode(url.getBytes(), Base64.DEFAULT)).trim();
-              func.initWithWebView(view,argsValue,key);
-              arrayMap.put(key,func);
-            }else if ("s" .equals(argsType)){
-              javaMethodParams.add(URLDecoder.decode(argsValue,"UTF-8"));
+              func.initWithWebView(view, argsValue, key);
+              arrayMap.put(key, func);
+            } else if ("s".equals(argsType)) {
+              javaMethodParams.add(URLDecoder.decode(argsValue, "UTF-8"));
             }
           }
         }
-        invoke(destJavaObj,methodName,javaMethodParams.toArray());
+        invoke(destJavaObj, methodName, javaMethodParams.toArray());
       } catch (UnsupportedEncodingException e) {
         e.printStackTrace();
       } catch (IllegalAccessException e) {
@@ -171,18 +175,17 @@ public class JsCallJava {
       }
       return true;
     }
-      return false;
-    }
+    return false;
+  }
 
   private void invoke(Object javaObj, String methodName, Object[] objects)
       throws InvocationTargetException, IllegalAccessException {
     Method[] declaredMethods = javaObj.getClass().getDeclaredMethods();
-    if(declaredMethods==null)
-      return;
+    if (declaredMethods == null) return;
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
-      if(methodName!=null&&methodName.equals(name)){
-        declaredMethods[i].invoke(javaObj,getValueByType(declaredMethods[i],objects));
+      if (methodName != null && methodName.equals(name)) {
+        declaredMethods[i].invoke(javaObj, getValueByType(declaredMethods[i], objects));
         return;
       }
     }
@@ -190,23 +193,23 @@ public class JsCallJava {
 
   private Object[] getValueByType(Method declaredMethod, Object[] objects) {
     Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
-    if(objects.length!=parameterTypes.length){
+    if (objects.length != parameterTypes.length) {
       throw new IllegalArgumentException("参数不匹配");
     }
     List<Object> objectList = new ArrayList<>();
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> type = parameterTypes[i];
-      if(type==int.class)
+      if (type == int.class) {
         objectList.add(Integer.parseInt(objects[i].toString()));
-      else if(type==double.class){
+      } else if (type == double.class) {
         objectList.add(Double.parseDouble(objects[i].toString()));
-      }else if(type==float.class){
+      } else if (type == float.class) {
         objectList.add(Float.parseFloat(objects[i].toString()));
-      }else if(type==byte.class){
+      } else if (type == byte.class) {
         objectList.add(Byte.parseByte(objects[i].toString()));
-      }else if(type==long.class){
+      } else if (type == long.class) {
         objectList.add(Long.parseLong(objects[i].toString()));
-      }else{
+      } else {
         objectList.add(objects[i]);
       }
     }
