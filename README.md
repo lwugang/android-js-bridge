@@ -12,8 +12,9 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	   compile 'com.github.lwugang:android-js-bridge:v1.0'
+	    compile 'com.github.lwugang:android-js-bridge:v2.0'
 	}
+
 ~~~
 
 ####使用方式
@@ -26,29 +27,71 @@ Add the dependency
 ###Activity
 - A对象表示注入的插件对象,必须实现JsPlugin接口,A类中的所有public方法都会被注入到js中，可以被js调用
 ~~~java
-	WebView webView = (WebView) findViewById(R.id.web_view);
-    webView.addJavascriptInterface(new A(), "android");
-    webView.loadUrl("file:///android_asset/test.html");
-    
-    public class A implements JsPlugin{
-        public void jsCall(WebView webView, int data, final JsCallback jsCallback,
-            final JsCallback jc) {
-          Toast.makeText(webView.getContext(), data + "--", 1).show();
-          webView.postDelayed(new Runnable() {
-            @Override public void run() {
-              try {
-                jsCallback.apply("android callback");
-                jc.apply();
-              } catch (JsCallback.JsCallbackException e) {
-                e.printStackTrace();
-              }
+	package com.src.wugang.jsbridge;
+    import android.support.v7.app.AppCompatActivity;
+    import android.os.Bundle;
+    import android.util.Log;
+    import android.webkit.WebChromeClient;
+    import android.webkit.WebView;
+    import android.widget.Toast;
+    import com.wugang.jsbridge.library.BridgeWebView;
+    import com.wugang.jsbridge.library.JSFunction;
+    import com.wugang.jsbridge.library.JsPlugin;
+    import com.wugang.jsbridge.library.JsReturnValueCallback;
+
+    public class MainActivity extends AppCompatActivity {
+
+      @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.addJavascriptInterface(new A(), "android");
+        webView.addJavascriptInterface(new B(), "ui");
+        webView.loadUrl("file:///android_asset/test.html");
+
+      }
+
+      public class A implements JsPlugin {
+
+        public void test(int data, JSFunction function) {
+          Toast.makeText(getApplicationContext(), data + "--", 1).show();
+          //返回值方式 只针对sdk 19以上使用
+          function.execute(new JsReturnValueCallback() {
+            @Override public void onReturnValue(String result) {
+              Toast.makeText(getApplicationContext(),  "return value--"+result, 1).show();
             }
-          }, 2000);
+          },80);
+        }
+      }
+
+      public class B implements JsPlugin {
+        public void test(int data) {
+          Toast.makeText(getApplicationContext(), data + "--", 1).show();
+        }
+      }
+    }
+~~~
+HTML&JS代码
+~~~js
+<html>
+    <script>
+        function test(){
+        	//调用 android 中的方法
+            android.test(20,function(d){
+                  alert(d);
+                  return 2048;
+            });
         }
 
-        public void setHtml(WebView webView, String s) {
-          Log.e("----------", "jsCall: " + s);
-        }
-  }
+    </script>
+    <body>
+        <button onclick="test()">call android</button>
+        <button onclick="ui.test(222222)">call android</button>
+        <a href="file:///android_asset/test1.html">test1</a>
+        <button onclick="location.reload()">刷新</button>
+    </body>
+</html>
 ~~~
 [参考项目https://github.com/lwugang/safe-java-js-webview-bridge](https://github.com/lwugang/safe-java-js-webview-bridge)
+[参考项目https://github.com/dukeland/EasyJSWebView](https://github.com/dukeland/EasyJSWebView)
