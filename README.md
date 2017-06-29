@@ -16,14 +16,14 @@ Add the dependency
 	}
 ~~~
 
-#####使用方式
+####使用方式
 ~~~xml
 	<com.wugang.jsbridge.library.BridgeWebView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/web_view"/>
 ~~~
-######Activity
+###Activity
 - A对象表示注入的插件对象,必须实现JsPlugin接口,A类中的所有public方法都会被注入到js中，可以被js调用
 ~~~java
 	WebView webView = (WebView) findViewById(R.id.web_view);

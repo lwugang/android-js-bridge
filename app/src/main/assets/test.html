@@ -1,17 +1,20 @@
 <html>
     <script>
-    windwo.android ={};
-        function callAndroid(){
-            android.jsCall(2048,function(s){
-                alert(s);
-                android.setHtml(document.getElementsByTagName('html')[0].innerHTML);
-            },function(){
-                alert("error");
-            });
+        function test(){
+            //EasyJS.inject('android',['test']);
+            //window['android']={};
 
+            android.test(20,function(d){
+                  alert(d);
+                  return 2048;
+            });
         }
+
     </script>
     <body>
-        <button onclick="callAndroid()">call android</button>
+        <button onclick="test()">call android</button>
+        <button onclick="ui.test(222222)">call android</button>
+        <a href="file:///android_asset/test1.html">test1</a>
+        <button onclick="location.reload()">刷新</button>
     </body>
 </html>

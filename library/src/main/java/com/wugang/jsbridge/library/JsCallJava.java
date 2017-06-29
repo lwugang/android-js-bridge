@@ -1,201 +1,192 @@
 package com.wugang.jsbridge.library;
 
-import android.text.TextUtils;
-import android.util.Log;
-import android.webkit.JsPromptResult;
 import android.webkit.WebView;
-import com.google.gson.Gson;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.List;
+import java.util.Map;
 
 public class JsCallJava {
-  private final static String TAG = "JsCallJava";
-  private final static String RETURN_RESULT_FORMAT = "{\"code\": %d, \"result\": %s}";
-  private final Object object;
-  private HashMap<String, Method> mMethodsMap;
-  private String mInjectedName;
-  private String mPreloadInterfaceJS;
-  private Gson mGson;
+  String INJECT_JS = "window.EasyJS = {\n"
+      + "\t__callbacks: {},\n"
+      + "\t\n"
+      + "\tinvokeCallback: function (cbID, removeAfterExecute){\n"
+      + "\t\tvar args = Array.prototype.slice.call(arguments);\n"
+      + "\t\targs.shift();\n"
+      + "\t\targs.shift();\n"
+      + "\t\t\n"
+      + "\t\tfor (var i = 0, l = args.length; i < l; i++){\n"
+      + "\t\t\targs[i] = decodeURIComponent(args[i]);\n"
+      + "\t\t}\n"
+      + "\t\t\n"
+      + "\t\tvar cb = EasyJS.__callbacks[cbID];\n"
+      + "\t\tif (removeAfterExecute){\n"
+      + "\t\t\tEasyJS.__callbacks[cbID] = undefined;\n"
+      + "\t\t}\n"
+      + "\t\treturn cb.apply(null, args);\n"
+      + "\t},\n"
+      + "\t\n"
+      + "\tcall: function (obj, functionName, args){\n"
+      + "\t\tvar formattedArgs = [];\n"
+      + "\t\tfor (var i = 0, l = args.length; i < l; i++){\n"
+      + "\t\t\tif (typeof args[i] == \"function\"){\n"
+      + "\t\t\t\tformattedArgs.push(\"f\");\n"
+      + "\t\t\t\tvar cbID = \"__cb\" + (+new Date);\n"
+      + "\t\t\t\tEasyJS.__callbacks[cbID] = args[i];\n"
+      + "\t\t\t\tformattedArgs.push(cbID);\n"
+      + "\t\t\t}else{\n"
+      + "\t\t\t\tformattedArgs.push(\"s\");\n"
+      + "\t\t\t\tformattedArgs.push(encodeURIComponent(args[i]));\n"
+      + "\t\t\t}\n"
+      + "\t\t}\n"
+      + "\t\t\n"
+      + "\t\tvar argStr = (formattedArgs.length > 0 ? \":\" + encodeURIComponent(formattedArgs.join(\":\")) : \"\");\n"
+      + "\t\t\n"
+      + "\t\tvar iframe = document.createElement(\"IFRAME\");\n"
+      + "\t\tiframe.setAttribute(\"src\", \"easy-js:\" + obj + \":\" + encodeURIComponent(functionName) + argStr);\n"
+      + "\t\tdocument.documentElement.appendChild(iframe);\n"
+      + "\t\tiframe.parentNode.removeChild(iframe);\n"
+      + "\t\tiframe = null;\n"
+      + "\t\t\n"
+      + "\t\tvar ret = EasyJS.retValue;\n"
+      + "\t\tEasyJS.retValue = undefined;\n"
+      + "\t\t\n"
+      + "\t\tif (ret){\n"
+      + "\t\t\treturn decodeURIComponent(ret);\n"
+      + "\t\t}\n"
+      + "\t},\n"
+      + "\t\n"
+      + "\tinject: function (obj, methods){\n"
+      + "\t\twindow[obj] = {};\n"
+      + "\t\tvar jsObj = window[obj];\n"
+      + "\t\t\n"
+      + "\t\tfor (var i = 0, l = methods.length; i < l; i++){\n"
+      + "\t\t\t(function (){\n"
+      + "\t\t\t\tvar method = methods[i];\n"
+      + "\t\t\t\tvar jsMethod = method.replace(new RegExp(\":\", \"g\"), \"\");\n"
+      + "\t\t\t\tjsObj[jsMethod] = function (){\n"
+      + "\t\t\t\t\treturn EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\n"
+      + "\t\t\t\t};\n"
+      + "\t\t\t})();\n"
+      + "\t\t}\n"
+      + "\t},\n"
+      + "\treturnValue:function(data){\n"
+      + "\t\treturn data;\n"
+      + "\t}\n"
+      + "};";
+  public Map<String, Object> objectMap;
 
-  public JsCallJava(String injectedName, Object object) {
-    this.object = object;
-    try {
-      if (TextUtils.isEmpty(injectedName)) {
-        throw new Exception("injected name can not be null");
-      }
-      mInjectedName = injectedName;
-      mMethodsMap = new HashMap<String, Method>();
-      //获取自身声明的所有方法（包括public private protected）， getMethods会获得所有继承与非继承的方法
-      Method[] methods = object.getClass().getDeclaredMethods();
-      StringBuilder sb = new StringBuilder("javascript:(function(b){console.log(\"");
-      sb.append(mInjectedName);
-      sb.append(
-          " initialization begin\");var a={queue:[],callback:function(){var d=Array.prototype.slice.call(arguments,0);var c=d.shift();var e=d.shift();this.queue[c].apply(this,d);if(!e){delete this.queue[c]}}};");
-      for (Method method : methods) {
-        if (method.getModifiers() != Modifier.PUBLIC) {
-          continue;
+  public void addJavascriptInterfaces(Object obj, String name) {
+    if (objectMap == null) objectMap = new HashMap<>();
+    objectMap.put(name, obj);
+  }
+
+  public void onPageStarted(final WebView view, String url) {
+    final StringBuilder sb = new StringBuilder();
+    for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+      sb.append("EasyJS.inject('");
+      sb.append(entry.getKey());
+      sb.append("', [");
+      Method[] methods = entry.getValue().getClass().getDeclaredMethods();
+      for (int i = 0; i < methods.length; i++) {
+        sb.append("\"");
+        sb.append(methods[i].getName());
+        sb.append("\"");
+        if(i!=(methods.length-1)){
+          sb.append(",");
         }
-        String sign;
-        if ((sign = genJavaMethodSign(method)) == null) {
-          continue;
-        }
-        mMethodsMap.put(sign, method);
-        sb.append(String.format("a.%s=", method.getName()));
       }
-
-      sb.append("function(){var f=Array.prototype.slice.call(arguments,0);if(f.length<1){throw\"");
-      sb.append(mInjectedName);
-      sb.append(
-          " call error, message:miss method name\"}var e=[];for(var h=1;h<f.length;h++){var c=f[h];var j=typeof c;e[e.length]=j;if(j==\"function\"){var d=a.queue.length;a.queue[d]=c;f[h]=d}}var g=JSON.parse(prompt(JSON.stringify({method:f.shift(),types:e,args:f})));if(g.code!=200){throw\"");
-      sb.append(mInjectedName);
-      sb.append(
-          " call error, code:\"+g.code+\", message:\"+g.result}return g.result};Object.getOwnPropertyNames(a).forEach(function(d){var c=a[d];if(typeof c===\"function\"&&d!==\"callback\"){a[d]=function(){return c.apply(a,[d].concat(Array.prototype.slice.call(arguments,0)))}}});b.");
-      sb.append(mInjectedName);
-      sb.append("=a;console.log(\"");
-      sb.append(mInjectedName);
-      sb.append(" initialization end\")})(window);");
-      mPreloadInterfaceJS = sb.toString();
-    } catch (Exception e) {
-      Log.e(TAG, "init js error:" + e.getMessage());
+      sb.append("]);");
     }
-  }
-
-  private String genJavaMethodSign(Method method) {
-    String sign = method.getName();
-    Class[] argsTypes = method.getParameterTypes();
-    int len = argsTypes.length;
-    if (len < 1 || argsTypes[0] != WebView.class) {
-      Log.w(TAG, "method(" + sign + ") must use webview to be first parameter, will be pass");
-      return null;
-    }
-    for (int k = 1; k < len; k++) {
-      Class cls = argsTypes[k];
-      if (cls == String.class) {
-        sign += "_S";
-      } else if (cls == int.class
-          || cls == long.class
-          || cls == float.class
-          || cls == double.class) {
-        sign += "_N";
-      } else if (cls == boolean.class) {
-        sign += "_B";
-      } else if (cls == JSONObject.class) {
-        sign += "_O";
-      } else if (cls == JsCallback.class) {
-        sign += "_F";
-      } else {
-        sign += "_P";
+    view.postDelayed(new Runnable() {
+      @Override public void run() {
+        view.loadUrl("javascript:" + INJECT_JS);
+        view.loadUrl("javascript:" + sb.toString());
       }
-    }
-    return sign;
+    },20);
   }
 
-  public String getPreloadInterfaceJS() {
-    return mPreloadInterfaceJS;
-  }
-
-  public void call(WebView webView, final String jsonStr, final JsPromptResult result) {
-    if (!TextUtils.isEmpty(jsonStr)) {
+  public boolean shouldOverrideUrlLoading(WebView view, String url) {
+    if (url.startsWith("easy-js:")) {
+      String[] strings = url.split(":");
+      //js调用的对象
+      String obj = strings[1];
+      //js调用的方法名
+      String methodName = strings[2];
+      //js调用对象对应的 java对象
+      Object destJavaObj = objectMap.get(obj);
       try {
-        JSONObject callJson = new JSONObject(jsonStr);
-        String methodName = callJson.getString("method");
-        JSONArray argsTypes = callJson.getJSONArray("types");
-        JSONArray argsVals = callJson.getJSONArray("args");
-        String sign = methodName;
-        int len = argsTypes.length();
-        Object[] values = new Object[len + 1];
-        int numIndex = 0;
-        String currType;
+        List<Object> javaMethodParams = new ArrayList<>();
 
-        values[0] = webView;
+        if(strings.length>3){//表示有参数
+          String[] args = URLDecoder.decode(strings[3], "UTF-8").split(":");
+          for (int i = 0, j = 0, l = args.length; i < l; i+=2, j++){
 
-        for (int k = 0; k < len; k++) {
-          currType = argsTypes.optString(k);
-          if ("string".equals(currType)) {
-            sign += "_S";
-            values[k + 1] = argsVals.isNull(k) ? null : argsVals.getString(k);
-          } else if ("number".equals(currType)) {
-            sign += "_N";
-            numIndex = numIndex * 10 + k + 1;
-          } else if ("boolean".equals(currType)) {
-            sign += "_B";
-            values[k + 1] = argsVals.getBoolean(k);
-          } else if ("object".equals(currType)) {
-            sign += "_O";
-            values[k + 1] = argsVals.isNull(k) ? null : argsVals.getJSONObject(k);
-          } else if ("function".equals(currType)) {
-            sign += "_F";
-            values[k + 1] = new JsCallback(webView, mInjectedName, argsVals.getInt(k));
-          } else {
-            sign += "_P";
-          }
-        }
+            String argsType = args[i];
+            String argsValue = args[i+1];
 
-        Method currMethod = mMethodsMap.get(sign);
-
-        // 方法匹配失败
-        if (currMethod == null) {
-          result.confirm(
-              getReturn(jsonStr, 500, "not found method(" + sign + ") with valid parameters"));
-        }
-        // 数字类型细分匹配
-        if (numIndex > 0) {
-          Class[] methodTypes = currMethod.getParameterTypes();
-          int currIndex;
-          Class currCls;
-          while (numIndex > 0) {
-            currIndex = numIndex - numIndex / 10 * 10;
-            currCls = methodTypes[currIndex];
-            if (currCls == int.class) {
-              values[currIndex] = argsVals.getInt(currIndex - 1);
-            } else if (currCls == long.class) {
-              //WARN: argsJson.getLong(k + defValue) will return a bigger incorrect number
-              values[currIndex] = Long.parseLong(argsVals.getString(currIndex - 1));
-            } else {
-              values[currIndex] = argsVals.getDouble(currIndex - 1);
+            if ("f".equals(argsType)){//f 表示这个参数是一个函数
+              JSFunction func = new JSFunction();
+              func.initWithWebView(view,argsValue);
+              javaMethodParams.add(func);
+            }else if ("s" .equals(argsType)){
+              javaMethodParams.add(URLDecoder.decode(argsValue,"UTF-8"));
             }
-            numIndex /= 10;
           }
         }
-        result.confirm(getReturn(jsonStr, 200, currMethod.invoke(object, values)));
-      } catch (Exception e) {
-        //优先返回详细的错误信息
-        if (e.getCause() != null) {
-          result.confirm(
-              getReturn(jsonStr, 500, "method execute error:" + e.getCause().getMessage()));
-        }
-        result.confirm(getReturn(jsonStr, 500, "method execute error:" + e.getMessage()));
+        invoke(destJavaObj,methodName,javaMethodParams.toArray());
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+      } catch (IllegalAccessException e) {
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
       }
-    } else {
-      result.confirm(getReturn(jsonStr, 500, "call data empty"));
+      return true;
+    }
+      return false;
+    }
+
+  private void invoke(Object javaObj, String methodName, Object[] objects)
+      throws InvocationTargetException, IllegalAccessException {
+    Method[] declaredMethods = javaObj.getClass().getDeclaredMethods();
+    if(declaredMethods==null)
+      return;
+    for (int i = 0; i < declaredMethods.length; i++) {
+      String name = declaredMethods[i].getName();
+      if(methodName!=null&&methodName.equals(name)){
+        declaredMethods[i].invoke(javaObj,getValueByType(declaredMethods[i],objects));
+        return;
+      }
     }
   }
 
-  private String getReturn(String reqJson, int stateCode, Object result) {
-    String insertRes;
-    if (result == null) {
-      insertRes = "null";
-    } else if (result instanceof String) {
-      result = ((String) result).replace("\"", "\\\"");
-      insertRes = "\"" + result + "\"";
-    } else if (!(result instanceof Integer)
-        && !(result instanceof Long)
-        && !(result instanceof Boolean)
-        && !(result instanceof Float)
-        && !(result instanceof Double)
-        && !(result instanceof JSONObject)) {    // 非数字或者非字符串的构造对象类型都要序列化后再拼接
-      if (mGson == null) {
-        mGson = new Gson();
-      }
-      insertRes = mGson.toJson(result);
-    } else {  //数字直接转化
-      insertRes = String.valueOf(result);
+  private Object[] getValueByType(Method declaredMethod, Object[] objects) {
+    Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
+    if(objects.length!=parameterTypes.length){
+      throw new IllegalArgumentException("参数不匹配");
     }
-    String resStr = String.format(RETURN_RESULT_FORMAT, stateCode, insertRes);
-    Log.d(TAG, mInjectedName + " call json: " + reqJson + " result:" + resStr);
-    return resStr;
+    List<Object> objectList = new ArrayList<>();
+    for (int i = 0; i < parameterTypes.length; i++) {
+      Class<?> type = parameterTypes[i];
+      if(type==int.class)
+        objectList.add(Integer.parseInt(objects[i].toString()));
+      else if(type==double.class){
+        objectList.add(Double.parseDouble(objects[i].toString()));
+      }else if(type==float.class){
+        objectList.add(Float.parseFloat(objects[i].toString()));
+      }else if(type==byte.class){
+        objectList.add(Byte.parseByte(objects[i].toString()));
+      }else if(type==long.class){
+        objectList.add(Long.parseLong(objects[i].toString()));
+      }else{
+        objectList.add(objects[i]);
+      }
+    }
+    return objectList.toArray();
   }
 }
