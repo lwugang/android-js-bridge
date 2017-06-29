@@ -5,9 +5,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 
 /**
@@ -50,14 +53,15 @@ public class BridgeWebView extends WebView {
    * @param name
    */
   @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object, String name) {
+    if(!getSettings().getJavaScriptEnabled())
+      getSettings().setJavaScriptEnabled(true);
     if(object instanceof JsPlugin) {
-      if(!getSettings().getJavaScriptEnabled())
-        getSettings().setJavaScriptEnabled(true);
       if(bridgeWebViewClient==null)
         this.setWebViewClient(new WebViewClient());
-      jsCallJava.addJavascriptInterfaces(object,name);
+      jsCallJava.addJavascriptInterfaces(this,object,name);
     }else{
       super.addJavascriptInterface(object,name);
     }
   }
+
 }

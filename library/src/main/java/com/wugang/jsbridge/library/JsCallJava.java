@@ -1,5 +1,8 @@
 package com.wugang.jsbridge.library;
 
+import android.util.ArrayMap;
+import android.util.Base64;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -78,11 +81,28 @@ public class JsCallJava {
       + "\t\treturn data;\n"
       + "\t}\n"
       + "};";
+  //js注入对象
   public Map<String, Object> objectMap;
 
-  public void addJavascriptInterfaces(Object obj, String name) {
+  //返回值回调队列
+  private Map<String,JSFunction> arrayMap;
+
+  public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
+    //预注入一个获取js返回值的对象
+    bridgeWebView.addJavascriptInterface(this,JSFunction.INJECT_OBJ_NAME);
     if (objectMap == null) objectMap = new HashMap<>();
     objectMap.put(name, obj);
+  }
+
+  /**
+   * javascript 返回结果
+   */
+  @JavascriptInterface public void returnValue(String callbackId,String result) {
+      JsReturnValueCallback returnValueCallback = arrayMap.get(callbackId).returnValueCallback;
+      if(returnValueCallback!=null) {
+        returnValueCallback.onReturnValue(result);
+        arrayMap.remove(callbackId);
+      }
   }
 
   public void onPageStarted(final WebView view, String url) {
@@ -131,8 +151,11 @@ public class JsCallJava {
 
             if ("f".equals(argsType)){//f 表示这个参数是一个函数
               JSFunction func = new JSFunction();
-              func.initWithWebView(view,argsValue);
               javaMethodParams.add(func);
+              if(arrayMap==null) arrayMap = new HashMap<>();
+              String key = new String(Base64.encode(url.getBytes(), Base64.DEFAULT)).trim();
+              func.initWithWebView(view,argsValue,key);
+              arrayMap.put(key,func);
             }else if ("s" .equals(argsType)){
               javaMethodParams.add(URLDecoder.decode(argsValue,"UTF-8"));
             }

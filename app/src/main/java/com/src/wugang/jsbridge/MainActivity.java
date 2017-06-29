@@ -3,6 +3,7 @@ package com.src.wugang.jsbridge;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
   public class A implements JsPlugin {
 
+
     public void test(int data, JSFunction function) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
       function.execute(new JsReturnValueCallback() {
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public class B implements JsPlugin {
+    @JavascriptInterface
     public void test(int data) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
     }

@@ -12,26 +12,23 @@ import java.net.URLEncoder;
  * sdk 大于 19 才能获取到返回值
  */
 
-public class JSFunction {
+public final class JSFunction {
   private String funcID;
   private WebView webView;
   private boolean removeAfterExecute = true;
 
-  private String injectObjName = "_callback";
+  public static final String INJECT_OBJ_NAME = "_callback";
+  public static final String CALLBACK_METHOD_NAME = "returnValue";
 
-  private JsReturnValueCallback returnValueCallback;
+  //回调
+  protected JsReturnValueCallback returnValueCallback;
 
-  protected final void initWithWebView(final WebView webView, String funcID) {
+  private String callbackId;
+
+  protected final void initWithWebView(final WebView webView, String funcID, String callbackId) {
     this.webView = webView;
     this.funcID = funcID;
-    webView.addJavascriptInterface(this,"");
-  }
-
-  /**
-   * javascript 返回结果
-   */
-  @JavascriptInterface public void returnValue(String result) {
-    if (returnValueCallback != null) returnValueCallback.onReturnValue(result);
+    this.callbackId = callbackId;
   }
 
   /**
@@ -67,7 +64,9 @@ public class JSFunction {
     try {
       this.returnValueCallback = returnValueCallback;
       final StringBuilder sb = new StringBuilder();
-      //sb.append(injectObjName).append(".returnValue(");
+      if (returnValueCallback != null) {
+        sb.append(INJECT_OBJ_NAME).append(".returnValue('").append(callbackId).append("',");
+      }
       sb.append(String.format("EasyJS.invokeCallback(\"%s\", %s", funcID,
           Boolean.toString(removeAfterExecute)));
       if (params != null) {
@@ -77,17 +76,9 @@ public class JSFunction {
           sb.append(String.format(", \"%s\"", arg));
         }
       }
-      //sb.append(")");
+      if (returnValueCallback != null) sb.append(")");
       sb.append(");");
-      if(Build.VERSION.SDK_INT>=19){
-        webView.evaluateJavascript(sb.toString(), new ValueCallback<String>() {
-          @Override public void onReceiveValue(String s) {
-            returnValueCallback.onReturnValue(s);
-          }
-        });
-      }else {
-        webView.loadUrl("javascript:" + sb.toString());
-      }
+      webView.loadUrl("javascript:" + sb.toString());
     } catch (Exception e) {
       e.printStackTrace();
     }
