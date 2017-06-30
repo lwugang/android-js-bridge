@@ -113,8 +113,6 @@ public class BridgeChromeClient extends WebChromeClient {
         webChromeClient.onPermissionRequestCanceled(request);
     }
 
-
-
     @Override public void onReceivedIcon(WebView view, Bitmap icon) {
         webChromeClient.onReceivedIcon(view, icon);
     }

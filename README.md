@@ -1,5 +1,9 @@
 # android-js-bridge
 ###android js 互相调用
+- #####支持js匿名函数接收
+- #####支持js json对象接收
+- #####支持js函数返回值获取
+
 Add it in your root build.gradle at the end of repositories:
 ~~~gradle
 	allprojects {
@@ -9,10 +13,11 @@ Add it in your root build.gradle at the end of repositories:
 		}
 	}
 ~~~
+
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v2.0.2'
+	    compile 'com.github.lwugang:android-js-bridge:v0.0.1'
 	}
 
 ~~~
@@ -77,10 +82,11 @@ HTML&JS代码
 <html>
     <script>
         function test(){
-        	//调用 android 中的方法
-            android.test(20,function(d){
+            var obj = "{'name':'lwg','age':123}";
+            //支持json对象传递,匿名函数传递
+            android.test(obj,function(d){
                   alert(d);
-                  return 2048;
+                  return 2048;//支持返回值获取
             });
         }
 
@@ -93,7 +99,7 @@ HTML&JS代码
     </body>
 </html>
 ~~~
-#Android7.0 webview 异常
+#Android7.0 webview 的一个坑(内部已处理)
 ###Android7.0不会调用此方法
 ~~~java
 @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -104,5 +110,7 @@ HTML&JS代码
 @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 }
 ~~~
+
 [参考项目https://github.com/lwugang/safe-java-js-webview-bridge](https://github.com/lwugang/safe-java-js-webview-bridge)
+
 [参考项目https://github.com/dukeland/EasyJSWebView](https://github.com/dukeland/EasyJSWebView)

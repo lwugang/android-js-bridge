@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
   public class A implements JsPlugin {
 
 
-    public void test(int data, JSFunction function) {
+    public void test(String data, JSFunction function) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
       function.execute(new JsReturnValueCallback() {
         @Override public void onReturnValue(String result) {

@@ -1,10 +1,8 @@
 <html>
     <script>
         function test(){
-            //EasyJS.inject('android',['test']);
-            //window['android']={};
-
-            android.test(20,function(d){
+            var obj = "{'name':'lwg','age':123}";
+            android.test(obj,function(d){
                   alert(d);
                   //return 2048;
             });

@@ -17,8 +17,14 @@ import java.util.Map;
 
 public class JsCallJava {
   String INJECT_JS = "window.EasyJS = {\n"
+      + "\n"
       + "\t__callbacks: {},\n"
-      + "\t\n"
+      + "\n"
+      + "\tisJson:function(obj){  \n"
+      + "\t    var isjson = typeof(obj) == \"object\" && Object.prototype.toString.call(obj).toLowerCase() == \"[object object]\" && !obj.length;   \n"
+      + "\t    return isjson;  \n"
+      + "\t},\n"
+      + "\n"
       + "\tinvokeCallback: function (cbID, removeAfterExecute){\n"
       + "\t\tvar args = Array.prototype.slice.call(arguments);\n"
       + "\t\targs.shift();\n"
@@ -45,6 +51,9 @@ public class JsCallJava {
       + "\t\t\t\tformattedArgs.push(cbID);\n"
       + "\t\t\t}else{\n"
       + "\t\t\t\tformattedArgs.push(\"s\");\n"
+      + "\t\t\t\tif(EasyJS.isJson(args[i])){\n"
+      + "\t\t\t\t\targs[i] = JSON.stringify(args[i]);\n"
+      + "\t\t\t\t}\n"
       + "\t\t\t\tformattedArgs.push(encodeURIComponent(args[i]));\n"
       + "\t\t\t}\n"
       + "\t\t}\n"
@@ -78,9 +87,6 @@ public class JsCallJava {
       + "\t\t\t\t};\n"
       + "\t\t\t})();\n"
       + "\t\t}\n"
-      + "\t},\n"
-      + "\treturnValue:function(data){\n"
-      + "\t\treturn data;\n"
       + "\t}\n"
       + "};";
   //js注入对象
@@ -100,7 +106,10 @@ public class JsCallJava {
    * javascript 返回结果
    */
   @JavascriptInterface public void returnValue(String callbackId, String result) {
-    JsReturnValueCallback returnValueCallback = arrayMap.get(callbackId).returnValueCallback;
+    JSFunction jsFunction = arrayMap.get(callbackId);
+    if(jsFunction==null)
+      return;
+    JsReturnValueCallback returnValueCallback = jsFunction.returnValueCallback;
     if (returnValueCallback != null) {
       returnValueCallback.onReturnValue(result);
       arrayMap.remove(callbackId);
