@@ -44,11 +44,14 @@ public class BridgeWebViewClient extends WebViewClient {
     //   ----------------需要处理的方法 start-------------------
 
     @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        mJsCallJava.onPageStarted(view, url);
+        //mJsCallJava.onInject(view);
+        webViewClient.onPageStarted(view,url,favicon);
     }
 
     @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        return mJsCallJava.shouldOverrideUrlLoading(view, url);
+        if(mJsCallJava.shouldOverrideUrlLoading(view,url))
+            return true;
+        return webViewClient.shouldOverrideUrlLoading(view, url);
     }
     //   ----------------需要处理的方法 end-------------------
 
@@ -120,6 +123,8 @@ public class BridgeWebViewClient extends WebViewClient {
     }
 
     @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        if(mJsCallJava.shouldOverrideUrlLoading(view,request.getUrl().toString()))
+            return true;
         return webViewClient.shouldOverrideUrlLoading(view, request);
     }
 

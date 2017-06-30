@@ -12,7 +12,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v2.0.1'
+	    compile 'com.github.lwugang:android-js-bridge:v2.0.2'
 	}
 
 ~~~
@@ -92,6 +92,17 @@ HTML&JS代码
         <button onclick="location.reload()">刷新</button>
     </body>
 </html>
+~~~
+#Android7.0 webview 异常
+###Android7.0不会调用此方法
+~~~java
+@Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
+}
+~~~
+###Android7.0 需要重写此方法
+~~~java
+@Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+}
 ~~~
 [参考项目https://github.com/lwugang/safe-java-js-webview-bridge](https://github.com/lwugang/safe-java-js-webview-bridge)
 [参考项目https://github.com/dukeland/EasyJSWebView](https://github.com/dukeland/EasyJSWebView)

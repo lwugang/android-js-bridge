@@ -107,7 +107,7 @@ public class JsCallJava {
     }
   }
 
-  @SuppressLint("WrongConstant") public void onPageStarted(final WebView view, String url) {
+  @SuppressLint("WrongConstant") public void onInject(final WebView view) {
     final StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
       sb.append("EasyJS.inject('");
