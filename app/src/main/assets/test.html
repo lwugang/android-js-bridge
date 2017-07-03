@@ -3,7 +3,7 @@
         function test(){
             var obj = "{'name':'lwg','age':123}";
             android.demo(obj,function(d){
-                   document.getElementById('img01').src='data:image/png;base64,'+decodeURI(d);
+                   document.getElementById('img01').src='data:image/png;base64,'+d;
 
                   //return 2048;
             });
