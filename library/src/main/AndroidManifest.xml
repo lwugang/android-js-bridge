@@ -1,2 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.wugang.jsbridge.library"/>
+    package="com.wugang.jsbridge.library">
+
+  <application>
+    <activity android:name=".image.ImageSelectedActivity"/>
+    <activity android:name=".image.ImageSelectedCropActivity"/>
+    <activity android:name=".image.MyImagePreviewActivity"/>
+  </application>
+</manifest>

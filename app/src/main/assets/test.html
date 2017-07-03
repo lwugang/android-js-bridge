@@ -2,8 +2,9 @@
     <script>
         function test(){
             var obj = "{'name':'lwg','age':123}";
-            android.test(obj,function(d){
-                  alert(d);
+            android.demo(obj,function(d){
+                   document.getElementById('img01').src='data:image/png;base64,'+decodeURI(d);
+
                   //return 2048;
             });
         }
@@ -14,5 +15,6 @@
         <button onclick="ui.test(222222)">call android</button>
         <a href="file:///android_asset/test1.html">test1</a>
         <button onclick="location.reload()">刷新</button>
+        <img src="" id="img01" width="400" height="400"/>
     </body>
 </html>

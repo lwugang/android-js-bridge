@@ -1,10 +1,10 @@
 package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
-import android.util.ArrayMap;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import com.wugang.jsbridge.library.anno.JsInject;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -91,6 +91,8 @@ public class JsCallJava {
       + "};";
   //js注入对象
   public Map<String, Object> objectMap;
+  //js 注入对象对应的方法列表
+  public Map<Object, Map<String,String>> objectMethodMap;
 
   //返回值回调队列
   private Map<String, JSFunction> arrayMap;
@@ -98,12 +100,14 @@ public class JsCallJava {
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
     bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
-    if (objectMap == null) objectMap = new HashMap<>();
+    if (objectMap == null) {
+      objectMap = new HashMap<>();
+    }
     objectMap.put(name, obj);
   }
 
   /**
-   * javascript 返回结果
+   * javascript 注入一个获取返回值的方法
    */
   @JavascriptInterface public void returnValue(String callbackId, String result) {
     JSFunction jsFunction = arrayMap.get(callbackId);
@@ -123,11 +127,22 @@ public class JsCallJava {
       sb.append(entry.getKey());
       sb.append("', [");
       Method[] methods = entry.getValue().getClass().getDeclaredMethods();
+      if(methods.length>0) objectMethodMap= new HashMap<>();
       for (int i = 0; i < methods.length; i++) {
         //只注入public方法
         if (methods[i].getModifiers() != Modifier.PUBLIC) continue;
+        //只注入被该注解标记的方法
+        if(methods[i].getAnnotation(JsInject.class)==null){
+          continue;
+        }
+        String name = methods[i].getAnnotation(JsInject.class).value();
+        if(name==null||name.length()<1)
+          name = methods[i].getName();
+        Map<String,String> temp = new HashMap<>();
+        temp.put(name,methods[i].getName());
+        objectMethodMap.put(entry.getValue(),temp);
         sb.append("\"");
-        sb.append(methods[i].getName());
+        sb.append(name);
         sb.append("\"");
         if (i != (methods.length - 1)) {
           sb.append(",");
@@ -190,7 +205,7 @@ public class JsCallJava {
   private void invoke(Object javaObj, String methodName, Object[] objects)
       throws InvocationTargetException, IllegalAccessException {
     Method[] declaredMethods = javaObj.getClass().getDeclaredMethods();
-    if (declaredMethods == null) return;
+    methodName = objectMethodMap.get(javaObj).get(methodName);
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
       if (methodName != null && methodName.equals(name)) {

@@ -1,18 +1,25 @@
 package com.src.wugang.jsbridge;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.Toast;
+import com.bumptech.glide.Glide;
+import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
 import com.wugang.jsbridge.library.JsPlugin;
-import com.wugang.jsbridge.library.JsReturnValueCallback;
+import com.wugang.jsbridge.library.anno.JsInject;
+import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
+import java.net.URLEncoder;
+import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
+
+  private ImagePickerPluginUtils imagePickerPlugin ;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -22,24 +29,36 @@ public class MainActivity extends AppCompatActivity {
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
     webView.loadUrl("file:///android_asset/test.html");
+    imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
+  }
 
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    imagePickerPlugin.onActivityResult(requestCode,resultCode,data);
   }
 
   public class A implements JsPlugin {
 
-
-    public void test(String data, JSFunction function) {
-      Toast.makeText(getApplicationContext(), data + "--", 1).show();
-      function.execute(new JsReturnValueCallback() {
-        @Override public void onReturnValue(String result) {
-          Toast.makeText(getApplicationContext(),  "return value--"+result, 1).show();
+    @JsInject("demo")
+    public void test(String data, final JSFunction function) {
+      imagePickerPlugin.onPicker(new ImageLoader() {
+        @Override
+        public void displayImage(Activity activity, String s, ImageView imageView, int i, int i1) {
+          Glide.with(activity).load(s).into(imageView);
         }
-      },80);
+
+        @Override public void clearMemoryCache() {
+
+        }
+      }).subscribe(new Action1<String>() {
+        @Override public void call(String strings) {
+          function.execute(URLEncoder.encode(strings));
+        }
+      });
     }
   }
 
   public class B implements JsPlugin {
-    @JavascriptInterface
     public void test(int data) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
     }

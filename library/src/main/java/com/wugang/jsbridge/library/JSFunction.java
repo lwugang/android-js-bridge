@@ -1,10 +1,6 @@
 package com.wugang.jsbridge.library;
 
-import android.os.Build;
-import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
 import android.webkit.WebView;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**

@@ -3,6 +3,7 @@
 - #####支持js匿名函数接收
 - #####支持js json对象接收
 - #####支持js函数返回值获取
+- #####通过注解注入js方法，支持自定义方法名
 
 Add it in your root build.gradle at the end of repositories:
 ~~~gradle
@@ -17,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.0.1'
+	    compile 'com.github.lwugang:android-js-bridge:v0.0.2'
 	}
 
 ~~~
@@ -30,7 +31,7 @@ Add the dependency
         android:id="@+id/web_view"/>
 ~~~
 ###Activity
-- A对象表示注入的插件对象,必须实现JsPlugin接口,A类中的所有public方法都会被注入到js中，可以被js调用
+- A对象表示注入的插件对象,必须实现JsPlugin接口,所有需要注入的方法必须加 @JsInject 注解标记
 ~~~java
 	package com.src.wugang.jsbridge;
     import android.support.v7.app.AppCompatActivity;
@@ -58,7 +59,7 @@ Add the dependency
       }
 
       public class A implements JsPlugin {
-
+		@JsInject("demo")// 必须加上此注解
         public void test(int data, JSFunction function) {
           Toast.makeText(getApplicationContext(), data + "--", 1).show();
           //返回值方式 高低版本都可以使用
@@ -99,6 +100,16 @@ HTML&JS代码
     </body>
 </html>
 ~~~
+###版本历史
+	###v0.0.2
+- #####加入图片浏览，图片默认处理成base64,并压缩 (使用图片浏览服务必须的依赖)
+~~~gradle
+ 	 compile 'com.lzy.widget:imagepicker:0.5.5'
+  	compile 'io.reactivex:rxjava:1.1.2'
+~~~
+- #####修改注入方式，插件类中被注入的方法必须加上 @JsInject 注解标记
+
+
 #Android7.0 webview 的一个坑(内部已处理)
 ###Android7.0不会调用此方法
 ~~~java
