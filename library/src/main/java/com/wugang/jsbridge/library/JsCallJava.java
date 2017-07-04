@@ -92,7 +92,7 @@ public class JsCallJava {
   //js注入对象
   public Map<String, Object> objectMap;
   //js 注入对象对应的方法列表
-  public Map<Object, Map<String,String>> objectMethodMap;
+  public Map<Object, Map<String, String>> objectMethodMap;
 
   //返回值回调队列
   private Map<String, JSFunction> arrayMap;
@@ -111,8 +111,7 @@ public class JsCallJava {
    */
   @JavascriptInterface public void returnValue(String callbackId, String result) {
     JSFunction jsFunction = arrayMap.get(callbackId);
-    if(jsFunction==null)
-      return;
+    if (jsFunction == null) return;
     JsReturnValueCallback returnValueCallback = jsFunction.returnValueCallback;
     if (returnValueCallback != null) {
       returnValueCallback.onReturnValue(result);
@@ -127,20 +126,23 @@ public class JsCallJava {
       sb.append(entry.getKey());
       sb.append("', [");
       Method[] methods = entry.getValue().getClass().getDeclaredMethods();
-      if(methods.length>0) objectMethodMap= new HashMap<>();
-      Map<String,String> temp = new HashMap<>();
-      objectMethodMap.put(entry.getValue(),temp);
+      if (methods.length > 0 && objectMethodMap == null) {
+        objectMethodMap = new HashMap<>();
+      }
+      Map<String, String> temp = new HashMap<>();
+
+      objectMethodMap.put(entry.getValue(), temp);
+
       for (int i = 0; i < methods.length; i++) {
         //只注入public方法
         if (methods[i].getModifiers() != Modifier.PUBLIC) continue;
         //只注入被该注解标记的方法
-        if(methods[i].getAnnotation(JsInject.class)==null){
+        if (methods[i].getAnnotation(JsInject.class) == null) {
           continue;
         }
         String name = methods[i].getAnnotation(JsInject.class).value();
-        if(name==null||name.length()<1)
-          name = methods[i].getName();
-        temp.put(name,methods[i].getName());
+        if (name == null || name.length() < 1) name = methods[i].getName();
+        temp.put(name, methods[i].getName());
         sb.append("\"");
         sb.append(name);
         sb.append("\"");
