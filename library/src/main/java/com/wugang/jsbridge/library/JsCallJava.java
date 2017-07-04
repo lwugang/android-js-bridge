@@ -128,6 +128,8 @@ public class JsCallJava {
       sb.append("', [");
       Method[] methods = entry.getValue().getClass().getDeclaredMethods();
       if(methods.length>0) objectMethodMap= new HashMap<>();
+      Map<String,String> temp = new HashMap<>();
+      objectMethodMap.put(entry.getValue(),temp);
       for (int i = 0; i < methods.length; i++) {
         //只注入public方法
         if (methods[i].getModifiers() != Modifier.PUBLIC) continue;
@@ -138,9 +140,7 @@ public class JsCallJava {
         String name = methods[i].getAnnotation(JsInject.class).value();
         if(name==null||name.length()<1)
           name = methods[i].getName();
-        Map<String,String> temp = new HashMap<>();
         temp.put(name,methods[i].getName());
-        objectMethodMap.put(entry.getValue(),temp);
         sb.append("\"");
         sb.append(name);
         sb.append("\"");

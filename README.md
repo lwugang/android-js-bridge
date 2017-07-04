@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.0.4'
+	    compile 'com.github.lwugang:android-js-bridge:v0.0.5'
 	}
 
 ~~~
@@ -33,7 +33,7 @@ Add the dependency
 ###Activity
 - A对象表示注入的插件对象,必须实现JsPlugin接口,所有需要注入的方法必须加 @JsInject 注解标记
 ~~~java
-	package com.src.wugang.jsbridge;
+	   package com.src.wugang.jsbridge;
     import android.support.v7.app.AppCompatActivity;
     import android.os.Bundle;
     import android.util.Log;
@@ -108,7 +108,8 @@ HTML&JS代码
   	compile 'io.reactivex:rxjava:1.1.2'
 ~~~
 - #####修改注入方式，插件类中被注入的方法必须加上 @JsInject 注解标记
-
+###v0.0.5
+- #####修改注入bug
 
 #Android7.0 webview 的一个坑(内部已处理)
 ###Android7.0不会调用此方法
