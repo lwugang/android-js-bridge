@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.0.5'
+	    compile 'com.github.lwugang:android-js-bridge:v0.0.6'
 	}
 
 ~~~
