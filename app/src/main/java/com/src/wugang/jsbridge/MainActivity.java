@@ -8,6 +8,7 @@ import android.webkit.WebChromeClient;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
@@ -15,6 +16,9 @@ import com.wugang.jsbridge.library.JsPlugin;
 import com.wugang.jsbridge.library.anno.JsInject;
 import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
 import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,15 +56,25 @@ public class MainActivity extends AppCompatActivity {
         }
       }).subscribe(new Action1<String>() {
         @Override public void call(String strings) {
-          function.execute(URLEncoder.encode(strings));
+          function.execute(strings);
         }
       });
     }
   }
 
   public class B implements JsPlugin {
-    public void test(int data) {
+    @JsInject
+    public void test(int data,JSFunction function) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
+      JSONObject jsonObject = new JSONObject();
+      try {
+        jsonObject.put("loginState",true);
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+      HashMap<String,Object> map = new HashMap<>();
+      map.put("loginState",true);
+      function.execute("{\"loginState\":true}");
     }
   }
 }

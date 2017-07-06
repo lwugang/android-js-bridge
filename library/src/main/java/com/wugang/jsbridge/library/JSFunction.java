@@ -1,7 +1,6 @@
 package com.wugang.jsbridge.library;
 
 import android.webkit.WebView;
-import java.net.URLEncoder;
 
 /**
  * Created by lwg on 17-6-29.
@@ -68,8 +67,8 @@ public final class JSFunction {
       if (params != null) {
         for (int i = 0, l = params.length; i < l; i++) {
           String arg = params[i].toString();
-          arg = URLEncoder.encode(arg, "UTF-8");
-          sb.append(String.format(", \"%s\"", arg));
+          //arg = URLEncoder.encode(arg, "UTF-8");
+          sb.append(String.format(", '%s'", arg));
         }
       }
       if (returnValueCallback != null) sb.append(")");

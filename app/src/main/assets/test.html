@@ -7,12 +7,18 @@
 
                   //return 2048;
             });
+
         }
 
+function uitest(){
+    ui.test(22222,function(d){
+        alert(d)
+    });
+}
     </script>
     <body>
         <button onclick="test()">call android</button>
-        <button onclick="ui.test(222222)">call android</button>
+        <button onclick="uitest()">call android</button>
         <a href="file:///android_asset/test1.html">test1</a>
         <button onclick="location.reload()">刷新</button>
         <img src="" id="img01" width="400" height="400"/>
