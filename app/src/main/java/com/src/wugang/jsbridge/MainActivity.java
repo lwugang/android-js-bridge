@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -72,9 +74,7 @@ public class MainActivity extends AppCompatActivity {
       } catch (JSONException e) {
         e.printStackTrace();
       }
-      HashMap<String,Object> map = new HashMap<>();
-      map.put("loginState",true);
-      function.execute("{\"loginState\":true}");
+      function.execute(jsonObject);
     }
   }
 }

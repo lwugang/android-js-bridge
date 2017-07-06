@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ClientCertRequest;
@@ -43,7 +44,7 @@ public class BridgeWebViewClient extends WebViewClient {
   //   ----------------需要处理的方法 start-------------------
 
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    mJsCallJava.onInject(view);
+    //mJsCallJava.onInject(view);
     webViewClient.onPageStarted(view, url, favicon);
   }
 

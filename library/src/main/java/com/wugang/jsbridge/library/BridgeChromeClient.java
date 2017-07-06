@@ -11,6 +11,7 @@ package com.wugang.jsbridge.library;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;

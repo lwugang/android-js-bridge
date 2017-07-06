@@ -2,17 +2,11 @@ package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.util.Map;
 
 /**
@@ -76,6 +70,15 @@ public class BridgeWebView extends WebView {
     if(bridgeChromeClient==null)
       this.setWebChromeClient(new WebChromeClient());
     super.loadUrl(url);
+    if(!jsCallJava.isInject()) {
+      addJavascriptInterface(this, "Bridge");
+      loadUrl("javascript:Bridge.onDocumentLoad()");
+    }
+  }
+
+  @JavascriptInterface
+  public void onDocumentLoad(){
+    jsCallJava.onInject(this);
   }
 
   @Override public void loadData(String data, String mimeType, String encoding) {

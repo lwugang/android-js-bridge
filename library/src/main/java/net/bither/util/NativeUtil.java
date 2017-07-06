@@ -26,6 +26,16 @@ import java.io.IOException;
 public class NativeUtil {
 
   private static int DEFAULT_QUALITY = 75;
+  //最大图片大小 150KB
+  private static int DEFAULT_MAX_SIZE = 300;
+
+  public static void setDefaultQuality(int defaultQuality) {
+    DEFAULT_QUALITY = defaultQuality;
+  }
+
+  public static void setDefaultMaxSize(int defaultMaxSize) {
+    DEFAULT_MAX_SIZE = defaultMaxSize;
+  }
 
   /**
    * @param bit bitmap对象
@@ -49,8 +59,8 @@ public class NativeUtil {
    * @version V1.0.0
    */
   public static void compressBitmap(Bitmap image, String filePath) {
-    // 最大图片大小 150KB
-    int maxSize = 150;
+    //
+    int maxSize = DEFAULT_MAX_SIZE;
     // 获取尺寸压缩倍数
     int ratio = NativeUtil.getRatioSize(image.getWidth(), image.getHeight());
     // 压缩Bitmap到对应尺寸

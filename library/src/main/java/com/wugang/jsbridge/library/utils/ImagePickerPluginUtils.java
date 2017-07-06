@@ -23,7 +23,7 @@ import rx.Subscriber;
  * 图片选择
  */
 
-public class ImagePickerPluginUtils{
+public class ImagePickerPluginUtils {
 
   public static final String TOP_BAR_COLOR = "#cc22292c";
 
@@ -49,6 +49,22 @@ public class ImagePickerPluginUtils{
       }
     }
     return utils;
+  }
+
+  /**
+   * 设置压缩质量
+   * @param defaultQuality
+   */
+  public static void setDefaultQuality(int defaultQuality) {
+    NativeUtil.setDefaultQuality(defaultQuality);
+  }
+
+  /**
+   * 设置 压缩过后的图片大小
+   * @param defaultMaxSize
+   */
+  public static void setDefaultMaxSize(int defaultMaxSize) {
+    NativeUtil.setDefaultMaxSize(defaultMaxSize);
   }
 
   public void onActivityResult(int requestCode, int resultCode, Intent data) {

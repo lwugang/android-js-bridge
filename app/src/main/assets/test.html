@@ -9,10 +9,13 @@
             });
 
         }
+        window.onload=function(){
+            console.log('onload');
+        }
 
 function uitest(){
     ui.test(22222,function(d){
-        alert(d)
+        alert(JSON.parse(d).loginState)
     });
 }
     </script>
@@ -24,3 +27,6 @@ function uitest(){
         <img src="" id="img01" width="400" height="400"/>
     </body>
 </html>
+<script>
+    console.log('wwwwwwwwwwwwwwwwwww');
+</script>

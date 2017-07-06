@@ -97,6 +97,8 @@ public class JsCallJava {
   //返回值回调队列
   private Map<String, JSFunction> arrayMap;
 
+  private boolean isInject = false;
+
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
     bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
@@ -152,12 +154,17 @@ public class JsCallJava {
       }
       sb.append("]);");
     }
+    isInject = true;
     view.postDelayed(new Runnable() {
       @Override public void run() {
         view.loadUrl("javascript:" + INJECT_JS);
         view.loadUrl("javascript:" + sb.toString());
       }
     }, 20);
+  }
+
+  public boolean isInject() {
+    return isInject;
   }
 
   public boolean shouldOverrideUrlLoading(WebView view, String url) {
