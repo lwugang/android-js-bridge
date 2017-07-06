@@ -8,6 +8,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * Created by lwg on 17-6-27.
@@ -40,62 +41,67 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
-    super.setWebViewClient(bridgeWebViewClient = new BridgeWebViewClient(client,jsCallJava));
+    super.setWebViewClient(bridgeWebViewClient = new BridgeWebViewClient(client, jsCallJava));
   }
 
   @Override public void setWebChromeClient(WebChromeClient client) {
-    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client,jsCallJava));
+    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava));
   }
 
   /**
    * 如果注入的对象没有实现{@link JsPlugin}接口,就使用原生的注入方式
-   *  原生注入方式不支持执行 匿名js函数，不支持返回值获取
-   * @param object
-   * @param name
+   * 原生注入方式不支持执行 匿名js函数，不支持返回值获取
    */
-  @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object, String name) {
-    if(!getSettings().getJavaScriptEnabled())
-      getSettings().setJavaScriptEnabled(true);
-    if(object instanceof JsPlugin) {
-      jsCallJava.addJavascriptInterfaces(this,object,name);
-    }else{
-      super.addJavascriptInterface(object,name);
+  @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object,
+      String name) {
+    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
+    if (object instanceof JsPlugin) {
+      jsCallJava.addJavascriptInterfaces(this, object, name);
+    } else {
+      super.addJavascriptInterface(object, name);
     }
   }
 
   @Override public void loadUrl(String url) {
-    if(bridgeWebViewClient==null) {
+    if (bridgeWebViewClient == null) {
       this.setWebViewClient(new WebViewClient());
     }
-    if(bridgeChromeClient==null)
-      this.setWebChromeClient(new WebChromeClient());
+    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
     super.loadUrl(url);
-    if(!jsCallJava.isInject()) {
-      addJavascriptInterface(this, "Bridge");
-      loadUrl("javascript:Bridge.onDocumentLoad()");
+    if (!jsCallJava.isInject()) {
+      inject();
     }
   }
 
-  @JavascriptInterface
-  public void onDocumentLoad(){
-    jsCallJava.onInject(this);
+  /**
+   * 调用此方法注入
+   */
+  public void inject() {
+    addJavascriptInterface(this, "Bridge");
+    loadUrl("javascript:Bridge.onDocumentLoad()");
+  }
+
+  @JavascriptInterface public void onDocumentLoad() {
+    Executors.newSingleThreadExecutor().execute(new Runnable() {
+      @Override public void run() {
+        jsCallJava.onInject(BridgeWebView.this);
+      }
+    });
   }
 
   @Override public void loadData(String data, String mimeType, String encoding) {
-    if(bridgeWebViewClient==null) {
+    if (bridgeWebViewClient == null) {
       this.setWebViewClient(new WebViewClient());
     }
-    if(bridgeChromeClient==null)
-      this.setWebChromeClient(new WebChromeClient());
+    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
     super.loadData(data, mimeType, encoding);
   }
 
   @Override public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
-    if(bridgeWebViewClient==null) {
+    if (bridgeWebViewClient == null) {
       this.setWebViewClient(new WebViewClient());
     }
-    if(bridgeChromeClient==null)
-      this.setWebChromeClient(new WebChromeClient());
+    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
     super.loadUrl(url, additionalHttpHeaders);
   }
 
@@ -107,10 +113,9 @@ public class BridgeWebView extends WebView {
   }
 
   private void initClient() {
-    if(bridgeWebViewClient==null) {
+    if (bridgeWebViewClient == null) {
       this.setWebViewClient(new WebViewClient());
     }
-    if(bridgeChromeClient==null)
-      this.setWebChromeClient(new WebChromeClient());
+    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
   }
 }
