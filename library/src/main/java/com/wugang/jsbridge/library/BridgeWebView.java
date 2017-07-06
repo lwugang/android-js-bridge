@@ -8,7 +8,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 /**
  * Created by lwg on 17-6-27.
@@ -82,11 +81,7 @@ public class BridgeWebView extends WebView {
   }
 
   @JavascriptInterface public void onDocumentLoad() {
-    Executors.newSingleThreadExecutor().execute(new Runnable() {
-      @Override public void run() {
-        jsCallJava.onInject(BridgeWebView.this);
-      }
-    });
+    jsCallJava.onInject(BridgeWebView.this);
   }
 
   @Override public void loadData(String data, String mimeType, String encoding) {
