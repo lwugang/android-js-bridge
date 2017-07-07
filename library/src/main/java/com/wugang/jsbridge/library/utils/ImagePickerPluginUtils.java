@@ -43,17 +43,12 @@ public class ImagePickerPluginUtils {
   }
 
   public static ImagePickerPluginUtils getInstance(Activity activity) {
-    if (utils == null) {
-      synchronized (ImagePickerPluginUtils.class) {
-        if (utils == null) utils = new ImagePickerPluginUtils(activity);
-      }
-    }
+    utils = new ImagePickerPluginUtils(activity);
     return utils;
   }
 
   /**
    * 设置压缩质量
-   * @param defaultQuality
    */
   public static void setDefaultQuality(int defaultQuality) {
     NativeUtil.setDefaultQuality(defaultQuality);
@@ -61,7 +56,6 @@ public class ImagePickerPluginUtils {
 
   /**
    * 设置 压缩过后的图片大小
-   * @param defaultMaxSize
    */
   public static void setDefaultMaxSize(int defaultMaxSize) {
     NativeUtil.setDefaultMaxSize(defaultMaxSize);

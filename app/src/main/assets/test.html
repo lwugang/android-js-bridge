@@ -3,7 +3,8 @@
         function test(){
             var obj = "{'name':'lwg','age':123}";
             android.demo(obj,function(d){
-                   document.getElementById('img01').src='data:image/png;base64,'+d;
+                    alert(d);
+                   document.getElementById('img01').src='data:image/png;base64,'+JSON.parse(d).images[0];
 
                   //return 2048;
             });
@@ -15,7 +16,7 @@
 
 function uitest(){
     ui.test(22222,function(d){
-        alert(JSON.parse(d).loginState)
+        alert(d)
     });
 }
     </script>

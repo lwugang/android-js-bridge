@@ -2,23 +2,19 @@ package com.src.wugang.jsbridge;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.webkit.JavascriptInterface;
+import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebChromeClient;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.bumptech.glide.Glide;
-import com.google.gson.Gson;
 import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
 import com.wugang.jsbridge.library.JsPlugin;
 import com.wugang.jsbridge.library.anno.JsInject;
 import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
-import java.net.URLEncoder;
-import java.util.HashMap;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import rx.functions.Action1;
@@ -34,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     webView.setWebChromeClient(new WebChromeClient());
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
-    //webView.loadUrl("file:///android_asset/test.html");
-    webView.loadUrl("http://192.168.32.68:8888/templates/service.html");
+    webView.loadUrl("file:///android_asset/test.html");
+    //webView.loadUrl("http://192.168.32.68:8888/templates/service.html");
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
   }
 
@@ -59,7 +55,16 @@ public class MainActivity extends AppCompatActivity {
         }
       }).subscribe(new Action1<String>() {
         @Override public void call(String strings) {
-          function.execute(strings);
+          JSONObject jsonObject = new JSONObject();
+          try {
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(strings);
+
+            jsonObject.put("images",jsonArray);
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
+          function.execute("{\"images\":[\""+strings+"\"]}");
         }
       });
     }
@@ -67,11 +72,14 @@ public class MainActivity extends AppCompatActivity {
 
   public class B implements JsPlugin {
     @JsInject
-    public void test(int data,JSFunction function) {
+    public void test(String data,JSFunction function) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
       JSONObject jsonObject = new JSONObject();
       try {
         jsonObject.put("loginState",true);
+        JSONArray array = new JSONArray();
+        array.put(data);
+        jsonObject.put("arr",array);
       } catch (JSONException e) {
         e.printStackTrace();
       }
