@@ -36,7 +36,6 @@ public class BridgeWebView extends WebView {
   }
 
   private void init() {
-    getSettings().setJavaScriptEnabled(true);
     jsCallJava = new JsCallJava();
   }
 
@@ -54,6 +53,7 @@ public class BridgeWebView extends WebView {
    */
   @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object,
       String name) {
+    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
     if (object instanceof JsPlugin) {
       jsCallJava.addJavascriptInterfaces(this, object, name);
     } else {
@@ -72,13 +72,12 @@ public class BridgeWebView extends WebView {
     }
   }
 
-
   /**
    * 调用此方法注入
    */
   public void inject() {
-    super.addJavascriptInterface(this, "Bridge");
-    super.loadUrl("javascript:Bridge.onDocumentLoad()");
+    addJavascriptInterface(this, "Bridge");
+    loadUrl("javascript:Bridge.onDocumentLoad()");
   }
 
   @JavascriptInterface public void onDocumentLoad() {
