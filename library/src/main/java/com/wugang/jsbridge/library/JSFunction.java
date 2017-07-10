@@ -37,7 +37,7 @@ public final class JSFunction {
    * 执行js函数
    */
   public void execute() {
-    execute();
+    execute(null,null);
   }
 
   /**
