@@ -68,7 +68,6 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onPageFinished(WebView view, String url) {
     webViewClient.onPageFinished(view, url);
-    mJsCallJava.setInject(false);
   }
 
   @Override public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
