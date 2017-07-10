@@ -76,8 +76,8 @@ public class BridgeWebView extends WebView {
    * 调用此方法注入
    */
   public void inject() {
-    addJavascriptInterface(this, "Bridge");
-    loadUrl("javascript:Bridge.onDocumentLoad()");
+    super.addJavascriptInterface(this, "Bridge");
+    super.loadUrl("javascript:Bridge.onDocumentLoad()");
   }
 
   @JavascriptInterface public void onDocumentLoad() {
