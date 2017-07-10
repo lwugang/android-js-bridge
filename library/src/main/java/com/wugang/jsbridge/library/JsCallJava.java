@@ -230,9 +230,6 @@ public class JsCallJava {
 
   private Object[] getValueByType(Method declaredMethod, Object[] objects) {
     Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
-    if (objects.length != parameterTypes.length) {
-      throw new IllegalArgumentException("参数不匹配");
-    }
     List<Object> objectList = new ArrayList<>();
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> type = parameterTypes[i];

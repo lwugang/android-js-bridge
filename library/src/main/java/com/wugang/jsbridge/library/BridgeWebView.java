@@ -19,6 +19,7 @@ public class BridgeWebView extends WebView {
 
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
+  private int reloadCount = 0;
 
   public BridgeWebView(Context context) {
     super(context);
@@ -46,7 +47,7 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void setWebChromeClient(WebChromeClient client) {
-    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava,this));
+    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava, this));
   }
 
   /**
@@ -77,7 +78,12 @@ public class BridgeWebView extends WebView {
    * 调用此方法注入
    */
   public void inject() {
-    super.loadUrl("javascript:Bridge.onDocumentLoad()");
+    if (reloadCount > 3) {
+      jsCallJava.onInject(this);
+      return;
+    }
+    reloadCount++;
+    loadUrl("javascript:Bridge.onDocumentLoad()");
   }
 
   @JavascriptInterface public void onDocumentLoad() {
