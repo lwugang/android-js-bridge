@@ -37,6 +37,8 @@ public class BridgeWebView extends WebView {
 
   private void init() {
     jsCallJava = new JsCallJava();
+    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
+    super.addJavascriptInterface(this, "Bridge");
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
@@ -44,7 +46,7 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void setWebChromeClient(WebChromeClient client) {
-    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava));
+    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava,this));
   }
 
   /**
@@ -53,7 +55,6 @@ public class BridgeWebView extends WebView {
    */
   @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object,
       String name) {
-    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
     if (object instanceof JsPlugin) {
       jsCallJava.addJavascriptInterfaces(this, object, name);
     } else {
@@ -76,8 +77,7 @@ public class BridgeWebView extends WebView {
    * 调用此方法注入
    */
   public void inject() {
-    addJavascriptInterface(this, "Bridge");
-    loadUrl("javascript:Bridge.onDocumentLoad()");
+    super.loadUrl("javascript:Bridge.onDocumentLoad()");
   }
 
   @JavascriptInterface public void onDocumentLoad() {
