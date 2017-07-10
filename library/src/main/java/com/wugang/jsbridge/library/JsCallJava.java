@@ -167,6 +167,10 @@ public class JsCallJava {
     return isInject;
   }
 
+  public void setInject(boolean inject) {
+    isInject = inject;
+  }
+
   public boolean shouldOverrideUrlLoading(WebView view, String url) {
     if (url.startsWith("easy-js:")) {
       String[] strings = url.split(":");

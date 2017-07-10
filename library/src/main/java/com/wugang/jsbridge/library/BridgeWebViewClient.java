@@ -44,7 +44,7 @@ public class BridgeWebViewClient extends WebViewClient {
   //   ----------------需要处理的方法 start-------------------
 
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    //mJsCallJava.onInject(view);
+    mJsCallJava.onInject(view);
     webViewClient.onPageStarted(view, url, favicon);
   }
 
@@ -68,6 +68,7 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onPageFinished(WebView view, String url) {
     webViewClient.onPageFinished(view, url);
+    mJsCallJava.setInject(false);
   }
 
   @Override public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
