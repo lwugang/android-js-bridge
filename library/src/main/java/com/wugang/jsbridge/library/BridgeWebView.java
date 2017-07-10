@@ -78,8 +78,8 @@ public class BridgeWebView extends WebView {
    * 调用此方法注入
    */
   public void inject() {
-    if (reloadCount > 3) {
-      jsCallJava.onInject(this);
+    if (reloadCount > 10) {
+      reload();
       return;
     }
     reloadCount++;
