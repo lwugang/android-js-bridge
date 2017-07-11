@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by lwg on 17-7-11.
@@ -40,8 +42,13 @@ public class ThreadUtils {
             }
             final String str = "<script>"+injectCode+"</script>";
 
-            sb.insert("<html>".length(),str);
-
+            String regex ="<html(.*?)>";
+            Pattern part = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+            Matcher ma =part.matcher(sb);
+            if(ma.find()) {
+              int pos = ma.end();
+              sb.insert(pos, str);
+            }
             onResultListener.onResult(sb.toString());
             return;
           }else {

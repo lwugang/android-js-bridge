@@ -18,9 +18,10 @@ public class BridgeWebView extends WebView {
 
   private JsCallJava jsCallJava;
 
+  protected boolean isLoadUrl;//是否是通过loadUrl加载的
+
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
-  private int reloadCount = 0;
 
   public BridgeWebView(Context context) {
     super(context);
@@ -64,11 +65,14 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void loadUrl(final String url) {
+    isLoadUrl = true;
     if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
+      jsCallJava.onInject(this);
       ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
         @Override public void onResult(final String result) {
           post(new Runnable() {
             @Override public void run() {
+              jsCallJava.setInject(true);
               loadData(result,"text/html;charset=utf-8",null);
             }
           });
@@ -77,6 +81,8 @@ public class BridgeWebView extends WebView {
         @Override public void onError() {
           post(new Runnable() {
             @Override public void run() {
+              jsCallJava.setInject(false);
+              isLoadUrl = false;
               BridgeWebView.super.loadUrl(url);
             }
           });

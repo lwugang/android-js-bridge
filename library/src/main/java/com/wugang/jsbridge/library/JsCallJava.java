@@ -123,6 +123,10 @@ public class JsCallJava {
   }
 
   @SuppressLint("WrongConstant") public void onInject(final WebView view) {
+    if(isInject()) {
+      loadJs(view);
+      return;
+    }
     final StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
       sb.append("EasyJS.inject('");
@@ -155,11 +159,14 @@ public class JsCallJava {
       }
       sb.append("]);");
     }
-    isInject = true;
+    string = sb.toString();
+    loadJs(view);
+  }
+
+  private void loadJs(final WebView view) {
     view.postDelayed(new Runnable() {
       @Override public void run() {
         view.loadUrl("javascript:" + INJECT_JS);
-        string = sb.toString();
         view.loadUrl("javascript:" + string);
       }
     }, 20);
