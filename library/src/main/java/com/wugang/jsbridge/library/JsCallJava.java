@@ -169,7 +169,7 @@ public class JsCallJava {
         view.loadUrl("javascript:" + INJECT_JS);
         view.loadUrl("javascript:" + string);
       }
-    }, 20);
+    }, 5);
   }
 
   public String getINJECT_JS() {

@@ -73,7 +73,11 @@ public final class JSFunction {
       }
       if (returnValueCallback != null) sb.append(")");
       sb.append(");");
-      webView.loadUrl("javascript:" + sb.toString());
+      webView.postDelayed(new Runnable() {
+        @Override public void run() {
+          webView.loadUrl("javascript:" + sb.toString());
+        }
+      },5);
     } catch (Exception e) {
       e.printStackTrace();
     }
