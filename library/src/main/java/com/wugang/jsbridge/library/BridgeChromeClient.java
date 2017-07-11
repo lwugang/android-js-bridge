@@ -24,19 +24,13 @@ import android.webkit.WebStorage;
 import android.webkit.WebView;
 
 public class BridgeChromeClient extends WebChromeClient {
-  private final WebView webView;
   private WebChromeClient webChromeClient;
 
   private JsCallJava mJsCallJava;
-  private boolean mIsInjectedJS;
 
-  private int reloadCount = 0;
-
-  public BridgeChromeClient(WebChromeClient webChromeClient, JsCallJava mJsCallJava,
-      WebView webView) {
+  public BridgeChromeClient(WebChromeClient webChromeClient, JsCallJava mJsCallJava) {
     this.webChromeClient = webChromeClient;
     this.mJsCallJava = mJsCallJava;
-    this.webView = webView;
   }
   //   ----------------需要处理的方法 start-------------------
 
@@ -46,14 +40,8 @@ public class BridgeChromeClient extends WebChromeClient {
     //2 OnPageFinished中注入，虽然最后都会全局注入成功，但是完成时间有可能太晚，当页面在初始化调用接口函数时会等待时间过长
     //3 在进度变化时注入，刚好可以在上面两个问题中得到一个折中处理
     //为什么是进度大于25%才进行注入，因为从测试看来只有进度大于这个数字页面才真正得到框架刷新加载，保证100%注入成功
-    BridgeWebView webView = (BridgeWebView) view;
-    if (newProgress >= 25&&!webView.isLoadUrl) {
-      if (!mIsInjectedJS) {
+    if (newProgress >= 25) {
         mJsCallJava.onInject(view);
-        mIsInjectedJS = true;
-      }
-    } else {
-      mIsInjectedJS = false;
     }
     super.onProgressChanged(view, newProgress);
   }
@@ -65,17 +53,6 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-    String message = consoleMessage.message();
-    if (message != null) {
-      if (message.contains("is not defined")) {
-        if (reloadCount > 3) {
-          reloadCount = 0;
-          return webChromeClient.onConsoleMessage(consoleMessage);
-        }
-        webView.reload();
-        reloadCount++;
-      }
-    }
     return webChromeClient.onConsoleMessage(consoleMessage);
   }
 

@@ -3,11 +3,11 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.webkit.JavascriptInterface;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import com.wugang.jsbridge.library.utils.ThreadUtils;
 import java.util.Map;
 
 /**
@@ -18,10 +18,9 @@ public class BridgeWebView extends WebView {
 
   private JsCallJava jsCallJava;
 
-  protected boolean isLoadUrl;//是否是通过loadUrl加载的
-
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
+  int reloadCount;
 
   public BridgeWebView(Context context) {
     super(context);
@@ -39,8 +38,8 @@ public class BridgeWebView extends WebView {
   }
 
   private void init() {
+    addJavascriptInterface(this, "Bridge");
     jsCallJava = new JsCallJava();
-    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
@@ -48,7 +47,7 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void setWebChromeClient(WebChromeClient client) {
-    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava, this));
+    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava));
   }
 
   /**
@@ -57,6 +56,7 @@ public class BridgeWebView extends WebView {
    */
   @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object,
       String name) {
+    if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
     if (object instanceof JsPlugin) {
       jsCallJava.addJavascriptInterfaces(this, object, name);
     } else {
@@ -64,50 +64,25 @@ public class BridgeWebView extends WebView {
     }
   }
 
-  @Override public void loadUrl(final String url) {
-    isLoadUrl = true;
-    if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
-      jsCallJava.onInject(this);
-      ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
-        @Override public void onResult(final String result) {
-          post(new Runnable() {
-            @Override public void run() {
-              jsCallJava.setInject(true);
-              loadData(result,"text/html;charset=utf-8",null);
-            }
-          });
-        }
-
-        @Override public void onError() {
-          post(new Runnable() {
-            @Override public void run() {
-              jsCallJava.setInject(false);
-              isLoadUrl = false;
-              BridgeWebView.super.loadUrl(url);
-            }
-          });
-        }
-      });
-    }
-    if (bridgeWebViewClient == null) {
-      this.setWebViewClient(new WebViewClient());
-    }
-    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+  @Override public void loadUrl(String url) {
+    initClient();
     super.loadUrl(url);
+    if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)) {
+      if (!jsCallJava.isInject() && reloadCount < 4) {
+        reloadCount++;
+        super.loadUrl("javascript:Bridge.onDocumentLoad()");
+      } else {
+        if (reloadCount > 3) {
+          loadUrl(url);
+          reloadCount = 0;
+        }
+      }
+    }
   }
-  //
-  ///**
-  // * 调用此方法注入
-  // */
-  //public void inject() {
-  //  if (reloadCount > 10) {
-  //    reload();
-  //    return;
-  //  }
-  //  reloadCount++;
-  //  loadUrl("javascript:Bridge.onDocumentLoad()");
-  //}
 
+  @JavascriptInterface public void onDocumentLoad() {
+    jsCallJava.onInject(this);
+  }
 
   @Override public void loadData(String data, String mimeType, String encoding) {
     initClient();
