@@ -3,10 +3,10 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.wugang.jsbridge.library.utils.ThreadUtils;
 import java.util.Map;
 
 /**
@@ -39,7 +39,6 @@ public class BridgeWebView extends WebView {
   private void init() {
     jsCallJava = new JsCallJava();
     if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
-    super.addJavascriptInterface(this, "Bridge");
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
@@ -64,57 +63,42 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void loadUrl(final String url) {
-    //new Thread(){
-    //  @Override public void run() {
-    //    try {
-    //      HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-    //      int responseCode = urlConnection.getResponseCode();
-    //      if(responseCode== HttpURLConnection.HTTP_OK){
-    //        InputStream inputStream = urlConnection.getInputStream();
-    //        int len = 0;
-    //        byte[] bytes = new byte[1024];
-    //        StringBuffer sb = new StringBuffer();
-    //        while ((len=inputStream.read(bytes))!=-1){
-    //          sb.append(new String(bytes,0,len));
-    //        }
-    //        String s = sb.toString();
-    //        final String str= "<script>Bridge.onDocumentLoad();</script>"+s;
-    //        post(new Runnable() {
-    //          @Override public void run() {
-    //            loadData(str,"text/html","UTF-8");
-    //          }
-    //        });
-    //      }
-    //    } catch (IOException e) {
-    //      e.printStackTrace();
-    //    }
-    //  }
-    //}.start();
-    //if (bridgeWebViewClient == null) {
-    //  this.setWebViewClient(new WebViewClient());
-    //}
-    //if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+    ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
+      @Override public void onResult(final String result) {
+        post(new Runnable() {
+          @Override public void run() {
+            loadData(result,"text/html","UTF-8");
+          }
+        });
+      }
+
+      @Override public void onError() {
+        post(new Runnable() {
+          @Override public void run() {
+           BridgeWebView.super.loadUrl(url);
+          }
+        });
+      }
+    });
+    if (bridgeWebViewClient == null) {
+      this.setWebViewClient(new WebViewClient());
+    }
+    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
     super.loadUrl(url);
-    if (!jsCallJava.isInject()) {
-      inject();
-    }
   }
+  //
+  ///**
+  // * 调用此方法注入
+  // */
+  //public void inject() {
+  //  if (reloadCount > 10) {
+  //    reload();
+  //    return;
+  //  }
+  //  reloadCount++;
+  //  loadUrl("javascript:Bridge.onDocumentLoad()");
+  //}
 
-  /**
-   * 调用此方法注入
-   */
-  public void inject() {
-    if (reloadCount > 10) {
-      reload();
-      return;
-    }
-    reloadCount++;
-    loadUrl("javascript:Bridge.onDocumentLoad()");
-  }
-
-  @JavascriptInterface public void onDocumentLoad() {
-    jsCallJava.onInject(BridgeWebView.this);
-  }
 
   @Override public void loadData(String data, String mimeType, String encoding) {
     if (bridgeWebViewClient == null) {

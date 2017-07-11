@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     webView.setWebChromeClient(new WebChromeClient());
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
-    webView.loadUrl("file:///android_asset/test.html");
+    webView.loadUrl("http://192.168.32.53:8080/test.html");
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user/templates/service.html");
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
   }
