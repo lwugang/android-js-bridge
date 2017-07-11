@@ -63,11 +63,37 @@ public class BridgeWebView extends WebView {
     }
   }
 
-  @Override public void loadUrl(String url) {
-    if (bridgeWebViewClient == null) {
-      this.setWebViewClient(new WebViewClient());
-    }
-    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+  @Override public void loadUrl(final String url) {
+    //new Thread(){
+    //  @Override public void run() {
+    //    try {
+    //      HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+    //      int responseCode = urlConnection.getResponseCode();
+    //      if(responseCode== HttpURLConnection.HTTP_OK){
+    //        InputStream inputStream = urlConnection.getInputStream();
+    //        int len = 0;
+    //        byte[] bytes = new byte[1024];
+    //        StringBuffer sb = new StringBuffer();
+    //        while ((len=inputStream.read(bytes))!=-1){
+    //          sb.append(new String(bytes,0,len));
+    //        }
+    //        String s = sb.toString();
+    //        final String str= "<script>Bridge.onDocumentLoad();</script>"+s;
+    //        post(new Runnable() {
+    //          @Override public void run() {
+    //            loadData(str,"text/html","UTF-8");
+    //          }
+    //        });
+    //      }
+    //    } catch (IOException e) {
+    //      e.printStackTrace();
+    //    }
+    //  }
+    //}.start();
+    //if (bridgeWebViewClient == null) {
+    //  this.setWebViewClient(new WebViewClient());
+    //}
+    //if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
     super.loadUrl(url);
     if (!jsCallJava.isInject()) {
       inject();
