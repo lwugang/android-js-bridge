@@ -3,6 +3,7 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -63,23 +64,25 @@ public class BridgeWebView extends WebView {
   }
 
   @Override public void loadUrl(final String url) {
-    ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
-      @Override public void onResult(final String result) {
-        post(new Runnable() {
-          @Override public void run() {
-            loadData(result,"text/html","UTF-8");
-          }
-        });
-      }
+    if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
+      ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
+        @Override public void onResult(final String result) {
+          post(new Runnable() {
+            @Override public void run() {
+              loadData(result,"text/html;charset=utf-8",null);
+            }
+          });
+        }
 
-      @Override public void onError() {
-        post(new Runnable() {
-          @Override public void run() {
-           BridgeWebView.super.loadUrl(url);
-          }
-        });
-      }
-    });
+        @Override public void onError() {
+          post(new Runnable() {
+            @Override public void run() {
+              BridgeWebView.super.loadUrl(url);
+            }
+          });
+        }
+      });
+    }
     if (bridgeWebViewClient == null) {
       this.setWebViewClient(new WebViewClient());
     }
@@ -101,18 +104,12 @@ public class BridgeWebView extends WebView {
 
 
   @Override public void loadData(String data, String mimeType, String encoding) {
-    if (bridgeWebViewClient == null) {
-      this.setWebViewClient(new WebViewClient());
-    }
-    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+    initClient();
     super.loadData(data, mimeType, encoding);
   }
 
   @Override public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
-    if (bridgeWebViewClient == null) {
-      this.setWebViewClient(new WebViewClient());
-    }
-    if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+    initClient();
     super.loadUrl(url, additionalHttpHeaders);
   }
 
