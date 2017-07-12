@@ -9,23 +9,25 @@
 package com.wugang.jsbridge.library;
 
 import android.graphics.Bitmap;
-import android.net.http.SslError;
+import android.os.Bundle;
 import android.os.Message;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.webkit.ClientCertRequest;
-import android.webkit.HttpAuthHandler;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
+import com.tencent.smtt.export.external.interfaces.HttpAuthHandler;
+import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
+import com.tencent.smtt.export.external.interfaces.WebResourceError;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 public class BridgeWebViewClient extends WebViewClient {
   private WebViewClient webViewClient;
 
   private JsCallJava mJsCallJava;
+
+  private boolean isLoadJs = false;
 
   public BridgeWebViewClient(WebViewClient webViewClient, JsCallJava mJsCallJava) {
     this.webViewClient = webViewClient;
@@ -36,7 +38,7 @@ public class BridgeWebViewClient extends WebViewClient {
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
     //BridgeWebView webView = (BridgeWebView) view;
     //if(!webView.isLoadUrl){
-    //  mJsCallJava.onInject(view);
+      mJsCallJava.onInject(view);
     //}
     //Log.e("----", "onPageStarted: " );
     webViewClient.onPageStarted(view, url, favicon);
@@ -54,18 +56,22 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onLoadResource(WebView view, String url) {
     webViewClient.onLoadResource(view, url);
-    //mJsCallJava.onInject(view);
+    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+    ||url.contains(".png"))) {
+      isLoadJs = true;
+      mJsCallJava.onInject(view);
+    }
   }
 
-  //@Override public void onDetectedBlankScreen(String s, int i) {
-  //  super.onDetectedBlankScreen(s, i);
-  //}
+  @Override public void onDetectedBlankScreen(String s, int i) {
+    super.onDetectedBlankScreen(s, i);
+  }
 
-  //@Override public WebResourceResponse shouldInterceptRequest(WebView webView,
-  //    WebResourceRequest webResourceRequest, Bundle bundle) {
-  //  mJsCallJava.shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
-  //  return super.shouldInterceptRequest(webView, webResourceRequest, bundle);
-  //}
+  @Override public WebResourceResponse shouldInterceptRequest(WebView webView,
+      WebResourceRequest webResourceRequest, Bundle bundle) {
+    mJsCallJava.shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
+    return super.shouldInterceptRequest(webView, webResourceRequest, bundle);
+  }
 
   @Override public void onPageFinished(WebView view, String url) {
     //Log.e("----", "onPageFinished: " );
@@ -73,7 +79,8 @@ public class BridgeWebViewClient extends WebViewClient {
     //if(webView.isLoadUrl) {
     //  webView.isLoadUrl = false;
     //}else{
-    //  mJsCallJava.onInject(view);
+    //Log.e("--------", "onPageFinished: " );
+      mJsCallJava.onInject(view);
     //}
     webViewClient.onPageFinished(view, url);
   }
@@ -108,10 +115,16 @@ public class BridgeWebViewClient extends WebViewClient {
     webViewClient.onReceivedLoginRequest(view, realm, account, args);
   }
 
-  @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-    webViewClient.onReceivedSslError(view, handler, error);
-    handler.proceed();
+  @Override public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler,
+      com.tencent.smtt.export.external.interfaces.SslError sslError) {
+    super.onReceivedSslError(webView, sslErrorHandler, sslError);
+    sslErrorHandler.proceed();
   }
+
+  //@Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+  //  webViewClient.onReceivedSslError(view, handler, error);
+  //  handler.proceed();
+  //}
 
   @Override public void onScaleChanged(WebView view, float oldScale, float newScale) {
     webViewClient.onScaleChanged(view, oldScale, newScale);
