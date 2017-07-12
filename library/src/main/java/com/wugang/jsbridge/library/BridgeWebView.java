@@ -3,10 +3,8 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.webkit.URLUtil;
 import com.tencent.smtt.sdk.WebChromeClient;
 import com.tencent.smtt.sdk.WebViewClient;
-import com.wugang.jsbridge.library.utils.ThreadUtils;
 import java.util.Map;
 
 /**
@@ -40,6 +38,7 @@ public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
   private void init() {
     jsCallJava = new JsCallJava();
     if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
+    getSettingsExtension().setJSPerformanceRecordEnable(true);
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
@@ -63,31 +62,31 @@ public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
     }
   }
 
-  public void loadUrl(final String baseUrl,final String url,final String historyUrl) {
-    isLoadUrl = true;
-    if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
-      jsCallJava.onInject(this);
-      ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
-        @Override public void onResult(final String result) {
-          post(new Runnable() {
-            @Override public void run() {
-              jsCallJava.setInject(true);
-              loadDataWithBaseURL(baseUrl,result,"text/html;charset=utf-8",null,historyUrl);
-            }
-          });
-        }
-
-        @Override public void onError() {
-          post(new Runnable() {
-            @Override public void run() {
-              jsCallJava.setInject(false);
-              isLoadUrl = false;
-              BridgeWebView.super.loadUrl(url);
-            }
-          });
-        }
-      });
-    }
+  public void loadUrl(final String url) {
+    //isLoadUrl = true;
+    //if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
+    //  jsCallJava.onInject(this);
+    //  ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
+    //    @Override public void onResult(final String result) {
+    //      post(new Runnable() {
+    //        @Override public void run() {
+    //          jsCallJava.setInject(true);
+    //          loadDataWithBaseURL(baseUrl,result,"text/html;charset=utf-8",null,historyUrl);
+    //        }
+    //      });
+    //    }
+    //
+    //    @Override public void onError() {
+    //      post(new Runnable() {
+    //        @Override public void run() {
+    //          jsCallJava.setInject(false);
+    //          isLoadUrl = false;
+    //          BridgeWebView.super.loadUrl(url);
+    //        }
+    //      });
+    //    }
+    //  });
+    //}
     initClient();
     super.loadUrl(url);
   }

@@ -102,7 +102,7 @@ public class JsCallJava {
 
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
-    bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
+    //bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
     if (objectMap == null) {
       objectMap = new HashMap<>();
     }

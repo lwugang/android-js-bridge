@@ -1,5 +1,6 @@
 package com.wugang.jsbridge.library;
 
+import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebView;
 
 /**
@@ -60,7 +61,7 @@ public final class JSFunction {
       this.returnValueCallback = returnValueCallback;
       final StringBuilder sb = new StringBuilder();
       if (returnValueCallback != null) {
-        sb.append(INJECT_OBJ_NAME).append(".returnValue('").append(callbackId).append("',");
+        //sb.append(INJECT_OBJ_NAME).append(".returnValue('").append(callbackId).append("',");
       }
       sb.append(String.format("EasyJS.invokeCallback(\"%s\", %s", funcID,
           Boolean.toString(removeAfterExecute)));
@@ -71,13 +72,18 @@ public final class JSFunction {
           sb.append(String.format(", '%s'", arg));
         }
       }
-      if (returnValueCallback != null) sb.append(")");
+      //if (returnValueCallback != null) sb.append(")");
       sb.append(");");
-      webView.postDelayed(new Runnable() {
-        @Override public void run() {
-          webView.loadUrl("javascript:" + sb.toString());
+      webView.evaluateJavascript("javascript:" + sb.toString(), new ValueCallback<String>() {
+        @Override public void onReceiveValue(String s) {
+          returnValueCallback.onReturnValue(s);
         }
-      },5);
+      });
+      //webView.postDelayed(new Runnable() {
+      //  @Override public void run() {
+      //    webView.loadUrl("javascript:" + sb.toString());
+      //  }
+      //},5);
     } catch (Exception e) {
       e.printStackTrace();
     }
