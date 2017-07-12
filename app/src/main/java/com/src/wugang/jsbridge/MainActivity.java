@@ -3,7 +3,6 @@ package com.src.wugang.jsbridge;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.webkit.WebChromeClient;
 import android.widget.Toast;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
@@ -22,11 +21,11 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
-    webView.setWebChromeClient(new WebChromeClient());
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
-    //webView.loadUrl("http://192.168.32.53:8080/test.html");
-    webView.loadUrl("http://192.168.10.217:1080/static/h5user/templates/service.html");
+    webView.loadUrl("http://192.168.32.53:8080","http://192.168.32.53:8080/test.html",null);
+    //webView.loadUrl("http://192.168.10.217:1080/static/h5user",url,null);
+    //webView.loadUrl("http://192.168.10.217:1080/static/h5user","http://192.168.10.217:1080/static/h5user/templates/service.html",null);
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
   }
 

@@ -11,17 +11,16 @@ package com.wugang.jsbridge.library;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
-import android.webkit.ConsoleMessage;
-import android.webkit.GeolocationPermissions;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.webkit.PermissionRequest;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebStorage;
-import android.webkit.WebView;
+import com.tencent.smtt.export.external.interfaces.ConsoleMessage;
+import com.tencent.smtt.export.external.interfaces.GeolocationPermissionsCallback;
+import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient;
+import com.tencent.smtt.export.external.interfaces.JsPromptResult;
+import com.tencent.smtt.export.external.interfaces.JsResult;
+import com.tencent.smtt.sdk.ValueCallback;
+import com.tencent.smtt.sdk.WebChromeClient;
+import com.tencent.smtt.sdk.WebStorage;
+import com.tencent.smtt.sdk.WebView;
 
 public class BridgeChromeClient extends WebChromeClient {
   private final WebView webView;
@@ -110,22 +109,11 @@ public class BridgeChromeClient extends WebChromeClient {
     webChromeClient.onGeolocationPermissionsHidePrompt();
   }
 
-  @Override public void onGeolocationPermissionsShowPrompt(String origin,
-      GeolocationPermissions.Callback callback) {
-    webChromeClient.onGeolocationPermissionsShowPrompt(origin, callback);
-  }
 
   @Override public void onHideCustomView() {
     webChromeClient.onHideCustomView();
   }
 
-  @Override public void onPermissionRequest(PermissionRequest request) {
-    webChromeClient.onPermissionRequest(request);
-  }
-
-  @Override public void onPermissionRequestCanceled(PermissionRequest request) {
-    webChromeClient.onPermissionRequestCanceled(request);
-  }
 
   @Override public void onReceivedIcon(WebView view, Bitmap icon) {
     webChromeClient.onReceivedIcon(view, icon);
@@ -143,7 +131,7 @@ public class BridgeChromeClient extends WebChromeClient {
     webChromeClient.onRequestFocus(view);
   }
 
-  @Override public void onShowCustomView(View view, CustomViewCallback callback) {
+  @Override public void onShowCustomView(View view, IX5WebChromeClient.CustomViewCallback callback) {
     webChromeClient.onShowCustomView(view, callback);
   }
 
@@ -152,13 +140,10 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override
-  public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+  public void onShowCustomView(View view, int requestedOrientation, IX5WebChromeClient.CustomViewCallback callback) {
     webChromeClient.onShowCustomView(view, requestedOrientation, callback);
   }
 
-  @Override public void onConsoleMessage(String message, int lineNumber, String sourceID) {
-    webChromeClient.onConsoleMessage(message, lineNumber, sourceID);
-  }
 
   @Override public void onExceededDatabaseQuota(String url, String databaseIdentifier, long quota,
       long estimatedDatabaseSize, long totalQuota, WebStorage.QuotaUpdater quotaUpdater) {
@@ -182,4 +167,14 @@ public class BridgeChromeClient extends WebChromeClient {
   @Override public void getVisitedHistory(ValueCallback<String[]> callback) {
     webChromeClient.getVisitedHistory(callback);
   }
+
+  @Override public void onGeolocationPermissionsShowPrompt(String s,
+      GeolocationPermissionsCallback geolocationPermissionsCallback) {
+    super.onGeolocationPermissionsShowPrompt(s, geolocationPermissionsCallback);
+  }
+
+  @Override public void openFileChooser(ValueCallback<Uri> valueCallback, String s, String s1) {
+    super.openFileChooser(valueCallback, s, s1);
+  }
+
 }

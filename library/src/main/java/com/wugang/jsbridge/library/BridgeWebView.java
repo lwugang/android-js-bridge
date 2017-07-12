@@ -4,9 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.webkit.URLUtil;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import com.tencent.smtt.sdk.WebChromeClient;
+import com.tencent.smtt.sdk.WebViewClient;
 import com.wugang.jsbridge.library.utils.ThreadUtils;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import java.util.Map;
  * Created by lwg on 17-6-27.
  */
 
-public class BridgeWebView extends WebView {
+public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
 
   private JsCallJava jsCallJava;
 

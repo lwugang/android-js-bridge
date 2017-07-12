@@ -9,28 +9,18 @@
 package com.wugang.jsbridge.library;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.net.http.SslError;
+import android.os.Bundle;
 import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
-import android.webkit.ClientCertRequest;
-import android.webkit.ConsoleMessage;
-import android.webkit.GeolocationPermissions;
-import android.webkit.HttpAuthHandler;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.webkit.PermissionRequest;
-import android.webkit.SslErrorHandler;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebStorage;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
+import com.tencent.smtt.export.external.interfaces.HttpAuthHandler;
+import com.tencent.smtt.export.external.interfaces.SslError;
+import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
+import com.tencent.smtt.export.external.interfaces.WebResourceError;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 public class BridgeWebViewClient extends WebViewClient {
   private WebViewClient webViewClient;
@@ -65,8 +55,14 @@ public class BridgeWebViewClient extends WebViewClient {
     webViewClient.onLoadResource(view, url);
   }
 
-  @Override public void onPageCommitVisible(WebView view, String url) {
-    webViewClient.onPageCommitVisible(view, url);
+  @Override public void onDetectedBlankScreen(String s, int i) {
+    super.onDetectedBlankScreen(s, i);
+  }
+
+  @Override public WebResourceResponse shouldInterceptRequest(WebView webView,
+      WebResourceRequest webResourceRequest, Bundle bundle) {
+    mJsCallJava.shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
+    return super.shouldInterceptRequest(webView, webResourceRequest, bundle);
   }
 
   @Override public void onPageFinished(WebView view, String url) {
@@ -125,10 +121,6 @@ public class BridgeWebViewClient extends WebViewClient {
     webViewClient.onTooManyRedirects(view, cancelMsg, continueMsg);
   }
 
-  @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-    if (mJsCallJava.shouldOverrideUrlLoading(view, request.getUrl().toString())) return true;
-    return webViewClient.shouldOverrideUrlLoading(view, request);
-  }
 
   @Override public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
     return webViewClient.shouldOverrideKeyEvent(view, event);
