@@ -38,7 +38,6 @@ public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
   private void init() {
     jsCallJava = new JsCallJava();
     if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
-    getSettingsExtension().setJSPerformanceRecordEnable(true);
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
