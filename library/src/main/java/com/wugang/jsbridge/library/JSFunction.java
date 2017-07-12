@@ -76,7 +76,8 @@ public final class JSFunction {
       sb.append(");");
       webView.evaluateJavascript("javascript:" + sb.toString(), new ValueCallback<String>() {
         @Override public void onReceiveValue(String s) {
-          returnValueCallback.onReturnValue(s);
+          if(returnValueCallback!=null)
+            returnValueCallback.onReturnValue(s);
         }
       });
       //webView.postDelayed(new Runnable() {
