@@ -36,7 +36,7 @@ public class BridgeWebViewClient extends WebViewClient {
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
     //BridgeWebView webView = (BridgeWebView) view;
     //if(!webView.isLoadUrl){
-    //  mJsCallJava.onInject(view);
+      mJsCallJava.onInject(view);
     //}
     webViewClient.onPageStarted(view, url, favicon);
   }
@@ -53,6 +53,7 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onLoadResource(WebView view, String url) {
     webViewClient.onLoadResource(view, url);
+    mJsCallJava.onInject(view);
   }
 
   @Override public void onDetectedBlankScreen(String s, int i) {
@@ -70,7 +71,7 @@ public class BridgeWebViewClient extends WebViewClient {
     //if(webView.isLoadUrl) {
     //  webView.isLoadUrl = false;
     //}else{
-    //  mJsCallJava.onInject(view);
+      mJsCallJava.onInject(view);
     //}
     webViewClient.onPageFinished(view, url);
   }
@@ -107,6 +108,7 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
     webViewClient.onReceivedSslError(view, handler, error);
+    handler.proceed();
   }
 
   @Override public void onScaleChanged(WebView view, float oldScale, float newScale) {

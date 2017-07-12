@@ -47,10 +47,10 @@ public class BridgeChromeClient extends WebChromeClient {
     //为什么是进度大于25%才进行注入，因为从测试看来只有进度大于这个数字页面才真正得到框架刷新加载，保证100%注入成功
     //BridgeWebView webView = (BridgeWebView) view;
     if (newProgress >= 25/*&&!webView.isLoadUrl*/) {
-      if (!mIsInjectedJS) {
+      //if (!mIsInjectedJS) {
         mJsCallJava.onInject(view);
-        mIsInjectedJS = true;
-      }
+        //mIsInjectedJS = true;
+      //}
     } else {
       mIsInjectedJS = false;
     }
