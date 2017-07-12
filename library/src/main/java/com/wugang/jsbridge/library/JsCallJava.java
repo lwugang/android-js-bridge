@@ -3,7 +3,7 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
-import com.tencent.smtt.sdk.WebView;
+import android.webkit.WebView;
 import com.wugang.jsbridge.library.anno.JsInject;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -95,7 +95,7 @@ public class JsCallJava {
 
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
-    //bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
+    bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
     if (objectMap == null) {
       objectMap = new HashMap<>();
     }

@@ -2,20 +2,22 @@ package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
-import com.tencent.smtt.sdk.WebChromeClient;
-import com.tencent.smtt.sdk.WebViewClient;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import java.util.Map;
 
 /**
  * Created by lwg on 17-6-27.
  */
 
-public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
+public class BridgeWebView extends WebView {
 
   private JsCallJava jsCallJava;
 
-  protected boolean isLoadUrl;//是否是通过loadUrl加载的
+  protected boolean isInject;//是否是通过loadUrl加载的
 
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
@@ -46,6 +48,19 @@ public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
 
   @Override public void setWebChromeClient(WebChromeClient client) {
     super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava, this));
+  }
+
+  @Override protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    int contentHeight = getContentHeight();
+    if (!isInject&&contentHeight>0) {
+      isInject = contentHeight > 0;
+      jsCallJava.onInject(this);
+    }
+  }
+
+  @Override public void invalidate() {
+    super.invalidate();
   }
 
   /**
@@ -101,7 +116,6 @@ public class BridgeWebView extends com.tencent.smtt.sdk.WebView {
   //  reloadCount++;
   //  loadUrl("javascript:Bridge.onDocumentLoad()");
   //}
-
 
   @Override public void loadData(String data, String mimeType, String encoding) {
     initClient();
