@@ -83,6 +83,7 @@ public final class JSFunction {
         webView.postDelayed(new Runnable() {
           @Override public void run() {
             webView.loadUrl("javascript:" + sb.toString());
+            webView.loadUrl("javascript:" + sb.toString());
           }
         }, 5);
       //}
