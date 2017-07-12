@@ -153,9 +153,10 @@ public class JsCallJava {
         sb.append("\"");
         sb.append(name);
         sb.append("\"");
-        if (i == (methods.length - 2)) {
-          sb.append(",");
-        }
+        sb.append(",");
+      }
+      if(methods.length>0){
+        sb.deleteCharAt(sb.length()-1);
       }
       sb.append("]);");
     }

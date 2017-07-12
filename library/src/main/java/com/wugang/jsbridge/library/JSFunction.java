@@ -46,7 +46,7 @@ public final class JSFunction {
    * @param returnValueCallback js返回值回调
    */
   public void execute(JsReturnValueCallback returnValueCallback) {
-    execute(returnValueCallback);
+    execute(returnValueCallback,null);
   }
 
   /**
