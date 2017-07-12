@@ -145,10 +145,21 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override
   public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+    String url = request.getUrl().toString();
+    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+        ||url.contains(".png"))) {
+      isLoadJs = true;
+      mJsCallJava.onInject(view);
+    }
     return webViewClient.shouldInterceptRequest(view, request);
   }
 
   @Override public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+        ||url.contains(".png"))) {
+      isLoadJs = true;
+      mJsCallJava.onInject(view);
+    }
     return webViewClient.shouldInterceptRequest(view, url);
   }
 
