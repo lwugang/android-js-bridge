@@ -230,7 +230,8 @@ public class JsCallJava {
     methodName = objectMethodMap.get(javaObj).get(methodName);
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
-      if (methodName != null && methodName.equals(name)) {
+      Class<?>[] parameterTypes = declaredMethods[i].getParameterTypes();
+      if (methodName != null && methodName.equals(name)&&parameterTypes.length==objects.length) {
         declaredMethods[i].invoke(javaObj, getValueByType(declaredMethods[i], objects));
         return;
       }
