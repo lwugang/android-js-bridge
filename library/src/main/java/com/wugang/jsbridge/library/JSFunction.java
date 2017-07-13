@@ -1,6 +1,6 @@
 package com.wugang.jsbridge.library;
 
-import com.tencent.smtt.sdk.WebView;
+import android.webkit.WebView;
 
 /**
  * Created by lwg on 17-6-29.

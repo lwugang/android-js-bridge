@@ -3,9 +3,10 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import com.tencent.smtt.sdk.WebChromeClient;
-import com.tencent.smtt.sdk.WebView;
-import com.tencent.smtt.sdk.WebViewClient;
+import android.webkit.URLUtil;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import java.util.Map;
 
 /**
@@ -63,54 +64,23 @@ public class BridgeWebView extends WebView {
   }
 
   public void loadUrl(final String url) {
-    //isLoadUrl = true;
-    //if(URLUtil.isHttpUrl(url)||URLUtil.isHttpsUrl(url)){
-    //  jsCallJava.onInject(this);
-    //  ThreadUtils.getInstance().downloadHtml(url, jsCallJava.getINJECT_JS(),new ThreadUtils.OnResultListener() {
-    //    @Override public void onResult(final String result) {
-    //      post(new Runnable() {
-    //        @Override public void run() {
-    //          jsCallJava.setInject(true);
-    //          loadDataWithBaseURL(baseUrl,result,"text/html;charset=utf-8",null,historyUrl);
-    //        }
-    //      });
-    //    }
-    //
-    //    @Override public void onError() {
-    //      post(new Runnable() {
-    //        @Override public void run() {
-    //          jsCallJava.setInject(false);
-    //          isLoadUrl = false;
-    //          BridgeWebView.super.loadUrl(url);
-    //        }
-    //      });
-    //    }
-    //  });
-    //}
+    if(!URLUtil.isJavaScriptUrl(url)){
+      jsCallJava.onInject(this);
+    }
     initClient();
     super.loadUrl(url);
   }
-  //
-  ///**
-  // * 调用此方法注入
-  // */
-  //public void inject() {
-  //  if (reloadCount > 10) {
-  //    reload();
-  //    return;
-  //  }
-  //  reloadCount++;
-  //  loadUrl("javascript:Bridge.onDocumentLoad()");
-  //}
-
 
   @Override public void loadData(String data, String mimeType, String encoding) {
     initClient();
+    jsCallJava.onInject(this);
     super.loadData(data, mimeType, encoding);
   }
 
   @Override public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
     initClient();
+    if(!URLUtil.isJavaScriptUrl(url))
+      jsCallJava.onInject(this);
     super.loadUrl(url, additionalHttpHeaders);
   }
 

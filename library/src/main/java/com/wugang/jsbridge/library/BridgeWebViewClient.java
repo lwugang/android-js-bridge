@@ -9,18 +9,18 @@
 package com.wugang.jsbridge.library;
 
 import android.graphics.Bitmap;
-import android.os.Bundle;
+import android.net.http.SslError;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import com.tencent.smtt.export.external.interfaces.ClientCertRequest;
-import com.tencent.smtt.export.external.interfaces.HttpAuthHandler;
-import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
-import com.tencent.smtt.export.external.interfaces.WebResourceError;
-import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
-import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
-import com.tencent.smtt.sdk.WebView;
-import com.tencent.smtt.sdk.WebViewClient;
+import android.webkit.ClientCertRequest;
+import android.webkit.HttpAuthHandler;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class BridgeWebViewClient extends WebViewClient {
   private WebViewClient webViewClient;
@@ -63,15 +63,6 @@ public class BridgeWebViewClient extends WebViewClient {
     }
   }
 
-  @Override public void onDetectedBlankScreen(String s, int i) {
-    super.onDetectedBlankScreen(s, i);
-  }
-
-  @Override public WebResourceResponse shouldInterceptRequest(WebView webView,
-      WebResourceRequest webResourceRequest, Bundle bundle) {
-    mJsCallJava.shouldOverrideUrlLoading(webView, webResourceRequest.getUrl().toString());
-    return super.shouldInterceptRequest(webView, webResourceRequest, bundle);
-  }
 
   @Override public void onPageFinished(WebView view, String url) {
     //Log.e("----", "onPageFinished: " );
@@ -83,15 +74,6 @@ public class BridgeWebViewClient extends WebViewClient {
       mJsCallJava.onInject(view);
     //}
     webViewClient.onPageFinished(view, url);
-  }
-
-  @Override public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
-    webViewClient.onReceivedClientCertRequest(view, request);
-  }
-
-  @Override
-  public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-    webViewClient.onReceivedError(view, request, error);
   }
 
   @Override
@@ -116,15 +98,11 @@ public class BridgeWebViewClient extends WebViewClient {
   }
 
   @Override public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler,
-      com.tencent.smtt.export.external.interfaces.SslError sslError) {
-    super.onReceivedSslError(webView, sslErrorHandler, sslError);
+      SslError sslError) {
+    webViewClient.onReceivedSslError(webView, sslErrorHandler, sslError);
     sslErrorHandler.proceed();
   }
 
-  //@Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-  //  webViewClient.onReceivedSslError(view, handler, error);
-  //  handler.proceed();
-  //}
 
   @Override public void onScaleChanged(WebView view, float oldScale, float newScale) {
     webViewClient.onScaleChanged(view, oldScale, newScale);
@@ -165,5 +143,24 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
     webViewClient.doUpdateVisitedHistory(view, url, isReload);
+  }
+
+  @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+    if(mJsCallJava.shouldOverrideUrlLoading(view, request.getUrl().toString()))
+      return true;
+    return super.shouldOverrideUrlLoading(view, request);
+  }
+
+  @Override public void onPageCommitVisible(WebView view, String url) {
+    webViewClient.onPageCommitVisible(view, url);
+  }
+
+  @Override
+  public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+    webViewClient.onReceivedError(view, request, error);
+  }
+
+  @Override public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
+    webViewClient.onReceivedClientCertRequest(view, request);
   }
 }

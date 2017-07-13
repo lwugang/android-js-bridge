@@ -3,7 +3,7 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
-import com.tencent.smtt.sdk.WebView;
+import android.webkit.WebView;
 import com.wugang.jsbridge.library.anno.JsInject;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -118,6 +118,8 @@ public class JsCallJava {
   }
 
   @SuppressLint("WrongConstant") public void onInject(final WebView view) {
+    if(objectMap==null||objectMap.isEmpty())
+      return;
     if(isInject()) {
       loadJs(view);
       return;
@@ -156,6 +158,7 @@ public class JsCallJava {
       sb.append("]);");
     }
     string = sb.toString();
+    setInject(true);
     loadJs(view);
   }
 

@@ -12,15 +12,15 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Message;
 import android.view.View;
-import com.tencent.smtt.export.external.interfaces.ConsoleMessage;
-import com.tencent.smtt.export.external.interfaces.GeolocationPermissionsCallback;
-import com.tencent.smtt.export.external.interfaces.IX5WebChromeClient;
-import com.tencent.smtt.export.external.interfaces.JsPromptResult;
-import com.tencent.smtt.export.external.interfaces.JsResult;
-import com.tencent.smtt.sdk.ValueCallback;
-import com.tencent.smtt.sdk.WebChromeClient;
-import com.tencent.smtt.sdk.WebStorage;
-import com.tencent.smtt.sdk.WebView;
+import android.webkit.ConsoleMessage;
+import android.webkit.GeolocationPermissions;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
+import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebStorage;
+import android.webkit.WebView;
 
 public class BridgeChromeClient extends WebChromeClient {
   private final WebView webView;
@@ -64,17 +64,6 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-    //String message = consoleMessage.message();
-    //if (message != null) {
-    //  if (message.contains("is not defined")) {
-    //    if (reloadCount > 3) {
-    //      reloadCount = 0;
-    //      return webChromeClient.onConsoleMessage(consoleMessage);
-    //    }
-    //    webView.reload();
-    //    reloadCount++;
-    //  }
-    //}
     return webChromeClient.onConsoleMessage(consoleMessage);
   }
 
@@ -131,18 +120,10 @@ public class BridgeChromeClient extends WebChromeClient {
     webChromeClient.onRequestFocus(view);
   }
 
-  @Override public void onShowCustomView(View view, IX5WebChromeClient.CustomViewCallback callback) {
-    webChromeClient.onShowCustomView(view, callback);
-  }
-
   @Override public boolean onJsTimeout() {
     return webChromeClient.onJsTimeout();
   }
 
-  @Override
-  public void onShowCustomView(View view, int requestedOrientation, IX5WebChromeClient.CustomViewCallback callback) {
-    webChromeClient.onShowCustomView(view, requestedOrientation, callback);
-  }
 
 
   @Override public void onExceededDatabaseQuota(String url, String databaseIdentifier, long quota,
@@ -168,13 +149,29 @@ public class BridgeChromeClient extends WebChromeClient {
     webChromeClient.getVisitedHistory(callback);
   }
 
-  @Override public void onGeolocationPermissionsShowPrompt(String s,
-      GeolocationPermissionsCallback geolocationPermissionsCallback) {
-    super.onGeolocationPermissionsShowPrompt(s, geolocationPermissionsCallback);
+  @Override public void onShowCustomView(View view, CustomViewCallback callback) {
+    webChromeClient.onShowCustomView(view, callback);
   }
 
-  @Override public void openFileChooser(ValueCallback<Uri> valueCallback, String s, String s1) {
-    super.openFileChooser(valueCallback, s, s1);
+  @Override
+  public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+    webChromeClient.onShowCustomView(view, requestedOrientation, callback);
   }
 
+  @Override public void onGeolocationPermissionsShowPrompt(String origin,
+      GeolocationPermissions.Callback callback) {
+    webChromeClient.onGeolocationPermissionsShowPrompt(origin, callback);
+  }
+
+  @Override public void onPermissionRequest(PermissionRequest request) {
+    webChromeClient.onPermissionRequest(request);
+  }
+
+  @Override public void onPermissionRequestCanceled(PermissionRequest request) {
+    webChromeClient.onPermissionRequestCanceled(request);
+  }
+
+  @Override public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+    webChromeClient.onConsoleMessage(message, lineNumber, sourceID);
+  }
 }
