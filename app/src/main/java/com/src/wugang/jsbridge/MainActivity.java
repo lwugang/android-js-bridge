@@ -23,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
-    webView.loadUrl("http://www.hao123.com");
+    webView.loadUrl("http://192.168.32.53:8080/test.html");
+
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user",url,null);
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user","http://192.168.10.217:1080/static/h5user/templates/service.html",null);
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
