@@ -72,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override public void clearMemoryCache() {
 
-        }
-      }).subscribe(new Action1<String>() {
+        }}).subscribe(new Action1<String>() {
         @Override public void call(String s) {
           function.execute(s);
         }

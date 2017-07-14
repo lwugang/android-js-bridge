@@ -169,4 +169,6 @@ HTML&JS代码
 
 [参考项目https://github.com/lwugang/safe-java-js-webview-bridge](https://github.com/lwugang/safe-java-js-webview-bridge)
 
-![参考项目https://github.com/dukeland/EasyJSWebView](https://raw.github.com/lwugang/android-js-bridge/blob/master/device-2017-07-14-171656.png)
+[参考项目https://github.com/dukeland/EasyJSWebView](https://github.com/dukeland/EasyJSWebView)
+
+![](https://github.com/lwugang/android-js-bridge/blob/master/device-2017-07-14-171656.png)
