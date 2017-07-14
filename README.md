@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.1.0'
+	    compile 'com.github.lwugang:android-js-bridge:v0.1.1'
 	}
 
 ~~~
@@ -32,71 +32,113 @@ Add the dependency
 ~~~
 ###Activity
 - A对象表示注入的插件对象,必须实现JsPlugin接口,所有需要注入的方法必须加 @JsInject 注解标记
+- 或者在类上声明@JsInject 该类中的所有public就会被注入
+- 如果该类中的方法不希望被注入可以 对方法加上@NoInject注解
 ~~~java
-	   package com.src.wugang.jsbridge;
-    import android.support.v7.app.AppCompatActivity;
+    package com.src.wugang.jsbridge;
+    import android.content.Intent;
     import android.os.Bundle;
-    import android.util.Log;
-    import android.webkit.WebChromeClient;
-    import android.webkit.WebView;
+    import android.support.v7.app.AppCompatActivity;
     import android.widget.Toast;
     import com.wugang.jsbridge.library.BridgeWebView;
     import com.wugang.jsbridge.library.JSFunction;
     import com.wugang.jsbridge.library.JsPlugin;
     import com.wugang.jsbridge.library.JsReturnValueCallback;
+    import com.wugang.jsbridge.library.anno.JsInject;
+    import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
+    import org.json.JSONArray;
+    import org.json.JSONException;
+    import org.json.JSONObject;
 
     public class MainActivity extends AppCompatActivity {
 
-      @Override protected void onCreate(Bundle savedInstanceState) {
+    private ImagePickerPluginUtils imagePickerPlugin ;
+
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
-        webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(new A(), "android");
         webView.addJavascriptInterface(new B(), "ui");
         webView.loadUrl("file:///android_asset/test.html");
-
-      }
-
-      public class A implements JsPlugin {
-		@JsInject("demo")// 必须加上此注解
-        public void test(int data, JSFunction function) {
-          Toast.makeText(getApplicationContext(), data + "--", 1).show();
-          //返回值方式 高低版本都可以使用
-          function.execute(new JsReturnValueCallback() {
-            @Override public void onReturnValue(String result) {
-              Toast.makeText(getApplicationContext(),  "return value--"+result, 1).show();
-            }
-          },80);
-        }
-      }
-
-      public class B implements JsPlugin {
-        public void test(int data) {
-          Toast.makeText(getApplicationContext(), data + "--", 1).show();
-        }
-      }
+        imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
     }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        imagePickerPlugin.onActivityResult(requestCode,resultCode,data);
+    }
+
+    @JsInject
+    public class A implements JsPlugin {
+
+    public String getResult() {//不支持此中方式返回数据给js
+      return "getResult";
+    }
+    public void testFun(JSFunction jsFunction){
+      jsFunction.execute("testFun");
+    }
+    @JsInject("ddd")//注入方法重命名
+    public void testFunReturn(JSFunction jsFunction){
+      jsFunction.execute(new JsReturnValueCallback() {
+        @Override public void onReturnValue(String result) {
+          Toast.makeText(MainActivity.this,result,0).show();
+        }
+      },"testFunReturn");
+    }
+    }
+
+    public class B implements JsPlugin {
+
+    @JsInject("showImagePicker")
+    public void test(String data,JSFunction function) {
+      Toast.makeText(getApplicationContext(), data + "--", 1).show();
+      JSONObject jsonObject = new JSONObject();
+      try {
+        jsonObject.put("loginState",true);
+        JSONArray array = new JSONArray();
+        array.put(data);
+        jsonObject.put("arr",array);
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+      function.execute(jsonObject);
+    }
+  }
+}
 ~~~
 HTML&JS代码
 ~~~js
 <html>
     <script>
         function test(){
-            var obj = "{'name':'lwg','age':123}";
-            //支持json对象传递,匿名函数传递
-            android.test(obj,function(d){
-                  alert(d);
-                  return 2048;//支持返回值获取
+            ui.showImagePicker("showImagePicker",function(d){
+                   alert(d)
+                 //  document.getElementById('img01').src='data:image/png;base64,'+JSON.parse(d).images[0];
             });
         }
-
+        function testFun(){
+            android.testFun(function(data){
+                alert(data);
+            });
+        }
+        function testFunReturn(){
+            android.ddd(function(data){
+                alert(data);
+                return "testFunReturn";
+            });
+        }
+        function getResult(){//这种形式是获取不到数据的
+            var result = android.getResult();
+            alert(result);
+        }
     </script>
     <body>
-        <button onclick="test()">call android</button>
-        <button onclick="ui.test(222222)">call android</button>
-        <a href="file:///android_asset/test1.html">test1</a>
-        <button onclick="location.reload()">刷新</button>
+        <button onclick="getResult()">getResult</button>
+        <button onclick="testFun()">testFun</button>
+        <button onclick="testFunReturn()">testFunReturn</button>
+        <button onclick="test()">select img</button>
+        <img src="" id="img01" width="400" height="400"/>
     </body>
 </html>
 ~~~
@@ -110,6 +152,8 @@ HTML&JS代码
 - #####修改注入方式，插件类中被注入的方法必须加上 @JsInject 注解标记
 ###v0.0.5
 - #####修改注入bug
+###v0.1.1
+- #####修改注入bug保证100%注入成功
 
 #Android7.0 webview 的一个坑(内部已处理)
 ###Android7.0不会调用此方法
@@ -125,4 +169,4 @@ HTML&JS代码
 
 [参考项目https://github.com/lwugang/safe-java-js-webview-bridge](https://github.com/lwugang/safe-java-js-webview-bridge)
 
-[参考项目https://github.com/dukeland/EasyJSWebView](https://github.com/dukeland/EasyJSWebView)
+![参考项目https://github.com/dukeland/EasyJSWebView](https://raw.github.com/lwugang/android-js-bridge/blob/master/device-2017-07-14-171656.png)
