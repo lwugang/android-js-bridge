@@ -1,9 +1,13 @@
 package com.src.wugang.jsbridge;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ImageView;
 import android.widget.Toast;
+import com.bumptech.glide.Glide;
+import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
 import com.wugang.jsbridge.library.JsPlugin;
@@ -13,6 +17,7 @@ import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,18 +63,22 @@ public class MainActivity extends AppCompatActivity {
   public class B implements JsPlugin {
 
     @JsInject("showImagePicker")
-    public void test(String data,JSFunction function) {
-      Toast.makeText(getApplicationContext(), data + "--", 1).show();
-      JSONObject jsonObject = new JSONObject();
-      try {
-        jsonObject.put("loginState",true);
-        JSONArray array = new JSONArray();
-        array.put(data);
-        jsonObject.put("arr",array);
-      } catch (JSONException e) {
-        e.printStackTrace();
-      }
-      function.execute(jsonObject);
+    public void test(String data,final JSFunction function) {
+      imagePickerPlugin.onPicker(new ImageLoader() {
+        @Override
+        public void displayImage(Activity activity, String s, ImageView imageView, int i, int i1) {
+          Glide.with(activity).load(s).into(imageView);
+        }
+
+        @Override public void clearMemoryCache() {
+
+        }
+      }).subscribe(new Action1<String>() {
+        @Override public void call(String s) {
+          function.execute(s);
+        }
+      });
+
     }
   }
 }

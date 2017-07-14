@@ -73,20 +73,11 @@ public final class JSFunction {
       }
       if (returnValueCallback != null) sb.append(")");
       sb.append(");");
-      //if(Build.VERSION.SDK_INT>=19) {
-      //  webView.evaluateJavascript("javascript:" + sb.toString(), new ValueCallback<String>() {
-      //    @Override public void onReceiveValue(String s) {
-      //      if (returnValueCallback != null) returnValueCallback.onReturnValue(s);
-      //    }
-      //  });
-      //}else {
         webView.postDelayed(new Runnable() {
           @Override public void run() {
             webView.loadUrl("javascript:" + sb.toString());
-            webView.loadUrl("javascript:" + sb.toString());
           }
         }, 5);
-      //}
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -97,7 +88,7 @@ public final class JSFunction {
    *
    * @param params 参数
    */
-  public void execute(Object... params) {
+  public void execute(String... params) {
     execute(null, params);
   }
 }
