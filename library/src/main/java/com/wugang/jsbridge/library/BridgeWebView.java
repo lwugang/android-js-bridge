@@ -1,12 +1,15 @@
 package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -39,6 +42,7 @@ public class BridgeWebView extends WebView {
 
   private void init() {
     jsCallJava = new JsCallJava();
+    removeSearchBoxJavaBridge();
     if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
   }
 
@@ -96,5 +100,35 @@ public class BridgeWebView extends WebView {
       this.setWebViewClient(new WebViewClient());
     }
     if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
+  }
+  /**
+   * 解决WebView远程执行代码漏洞，避免被“getClass”方法恶意利用（在loadUrl之前调用，如：MyWebView(Context context, AttributeSet attrs)里面）；
+   * 漏洞详解：http://drops.wooyun.org/papers/548
+   * <p/>
+   * function execute(cmdArgs)
+   * {
+   *     for (var obj in window) {
+   *        if ("getClass" in window[obj]) {
+   *            alert(obj);
+   *            return ?window[obj].getClass().forName("java.lang.Runtime")
+   *                 .getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);
+   *        }
+   *     }
+   * }
+   *
+   * @return
+   */
+  @TargetApi(11)
+  protected boolean removeSearchBoxJavaBridge() {
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+          && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        Method method = this.getClass().getMethod("removeJavascriptInterface", String.class);
+        method.invoke(this, "searchBoxJavaBridge_");
+        return true;
+      }
+    } catch (Exception e) {
+    }
+    return false;
   }
 }

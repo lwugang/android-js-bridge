@@ -7,6 +7,7 @@ import android.widget.Toast;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
 import com.wugang.jsbridge.library.JsPlugin;
+import com.wugang.jsbridge.library.JsReturnValueCallback;
 import com.wugang.jsbridge.library.anno.JsInject;
 import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
 import org.json.JSONArray;
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
-    webView.loadUrl("http://192.168.32.53:8080/test.html");
+    webView.loadUrl("file:///android_asset/test.html");
 
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user",url,null);
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user","http://192.168.10.217:1080/static/h5user/templates/service.html",null);
@@ -35,39 +36,28 @@ public class MainActivity extends AppCompatActivity {
     imagePickerPlugin.onActivityResult(requestCode,resultCode,data);
   }
 
+  @JsInject
   public class A implements JsPlugin {
 
-    @JsInject()
-    public void test(final JSFunction function) {
-      function.execute(String.format("{\"serverId\":%d}", 1));
-      //imagePickerPlugin.onPicker(new ImageLoader() {
-      //  @Override
-      //  public void displayImage(Activity activity, String s, ImageView imageView, int i, int i1) {
-      //    Glide.with(activity).load(s).into(imageView);
-      //  }
-      //
-      //  @Override public void clearMemoryCache() {
-      //
-      //  }
-      //}).subscribe(new Action1<String>() {
-      //  @Override public void call(String strings) {
-      //    JSONObject jsonObject = new JSONObject();
-      //    try {
-      //      JSONArray jsonArray = new JSONArray();
-      //      jsonArray.put(strings);
-      //
-      //      jsonObject.put("images",jsonArray);
-      //    } catch (JSONException e) {
-      //      e.printStackTrace();
-      //    }
-      //    function.execute("{\"images\":[\""+strings+"\"]}");
-      //  }
-      //});
+    public String getResult() {
+      return "getResult";
+    }
+    public void testFun(JSFunction jsFunction){
+      jsFunction.execute("testFun");
+    }
+    @JsInject("ddd")
+    public void testFunReturn(JSFunction jsFunction){
+      jsFunction.execute(new JsReturnValueCallback() {
+        @Override public void onReturnValue(String result) {
+          Toast.makeText(MainActivity.this,result,0).show();
+        }
+      },"testFunReturn");
     }
   }
 
   public class B implements JsPlugin {
-    @JsInject
+
+    @JsInject("showImagePicker")
     public void test(String data,JSFunction function) {
       Toast.makeText(getApplicationContext(), data + "--", 1).show();
       JSONObject jsonObject = new JSONObject();

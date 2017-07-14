@@ -1,16 +1,18 @@
 package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import com.wugang.jsbridge.library.anno.JsInject;
+import com.wugang.jsbridge.library.anno.NoInject;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +86,8 @@ public class JsCallJava {
       + "        }\n"
       + "    };\n"
       + "}";
+  //过滤object对象的方法
+  public List<String> filterMethodNames= Arrays.asList("getClass","hashCode","equals","toString","notify","notifyAll","wait");
   //js注入对象
   public Map<String, Object> objectMap;
   //js 注入对象对应的方法列表
@@ -118,9 +122,8 @@ public class JsCallJava {
   }
 
   @SuppressLint("WrongConstant") public void onInject(final WebView view) {
-    if(objectMap==null||objectMap.isEmpty())
-      return;
-    if(isInject()) {
+    if (objectMap == null || objectMap.isEmpty()) return;
+    if (isInject()) {
       loadJs(view);
       return;
     }
@@ -129,37 +132,72 @@ public class JsCallJava {
       sb.append("EasyJS.inject('");
       sb.append(entry.getKey());
       sb.append("', [");
-      Method[] methods = entry.getValue().getClass().getDeclaredMethods();
-      if (methods.length > 0 && objectMethodMap == null) {
+
+      List<Method> methods = findInjectMethods(entry.getValue());
+      if (methods.size() > 0 && objectMethodMap == null) {
         objectMethodMap = new HashMap<>();
       }
       Map<String, String> temp = new HashMap<>();
 
       objectMethodMap.put(entry.getValue(), temp);
 
-      for (int i = 0; i < methods.length; i++) {
-        //只注入public方法
-        if (methods[i].getModifiers() != Modifier.PUBLIC) continue;
-        //只注入被该注解标记的方法
-        if (methods[i].getAnnotation(JsInject.class) == null) {
+      for (int i = 0; i < methods.size(); i++) {
+        JsInject jsInject = methods.get(i).getAnnotation(JsInject.class);
+        String name = methods.get(i).getName();
+        if(filterMethodNames.contains(name)){
           continue;
         }
-        String name = methods[i].getAnnotation(JsInject.class).value();
-        if (name == null || name.length() < 1) name = methods[i].getName();
-        temp.put(name, methods[i].getName());
+        if(jsInject!=null) {
+          String tempName = jsInject.value();
+          if(!TextUtils.isEmpty(tempName))
+            name = tempName;
+        }
+        temp.put(name, methods.get(i).getName());
         sb.append("\"");
         sb.append(name);
         sb.append("\"");
         sb.append(",");
       }
-      if(methods.length>0){
-        sb.deleteCharAt(sb.length()-1);
+      if (methods.size() > 0) {
+        sb.deleteCharAt(sb.length() - 1);
       }
       sb.append("]);");
     }
     string = sb.toString();
     setInject(true);
     loadJs(view);
+  }
+
+  /**
+   * 查找需要注入的方法
+   */
+  List<Method> findInjectMethods(Object object) {
+    List<Method> methodList = new ArrayList<>();
+
+    Class<?> aClass = object.getClass();
+    //获取类中所有的方法
+    Method[] aClassMethods = aClass.getMethods();
+    //获取父类的注解
+    JsInject annotation = aClass.getAnnotation(JsInject.class);
+    //如果父类包含次注解就注入该类中的所有方法
+    boolean isInjectClass = annotation != null;
+    if (aClassMethods != null) {
+      for (int i = 0; i < aClassMethods.length; i++) {
+        Method aClassMethod = aClassMethods[i];
+        if (isInjectClass) {
+          if(aClassMethod.getAnnotation(NoInject.class)==null) {
+            methodList.add(aClassMethod);
+          }
+        } else {
+          //获取方法上的注解
+          JsInject jsInject = aClassMethod.getAnnotation(JsInject.class);
+          if (jsInject != null) {
+            methodList.add(aClassMethod);
+          }
+        }
+      }
+    }
+    return methodList;
   }
 
   private void loadJs(final WebView view) {
@@ -169,10 +207,6 @@ public class JsCallJava {
         view.loadUrl("javascript:" + string);
       }
     }, 5);
-  }
-
-  public String getINJECT_JS() {
-    return INJECT_JS+string;
   }
 
   public boolean isInject() {
@@ -234,7 +268,9 @@ public class JsCallJava {
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
       Class<?>[] parameterTypes = declaredMethods[i].getParameterTypes();
-      if (methodName != null && methodName.equals(name)&&parameterTypes.length==objects.length) {
+      if (methodName != null
+          && methodName.equals(name)
+          && parameterTypes.length == objects.length) {
         declaredMethods[i].invoke(javaObj, getValueByType(declaredMethods[i], objects));
         return;
       }

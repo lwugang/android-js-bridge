@@ -55,7 +55,7 @@ public final class JSFunction {
    * @param returnValueCallback js返回值回调
    * @param params 参数
    */
-  public void execute(final JsReturnValueCallback returnValueCallback, Object... params) {
+  public void execute(final JsReturnValueCallback returnValueCallback, String... params) {
     try {
       this.returnValueCallback = returnValueCallback;
       final StringBuilder sb = new StringBuilder();
@@ -66,7 +66,7 @@ public final class JSFunction {
           Boolean.toString(removeAfterExecute)));
       if (params != null) {
         for (int i = 0, l = params.length; i < l; i++) {
-          String arg = params[i].toString();
+          String arg = params[i];
           //arg = URLEncoder.encode(arg, "UTF-8");
           sb.append(String.format(", '%s'", arg));
         }
