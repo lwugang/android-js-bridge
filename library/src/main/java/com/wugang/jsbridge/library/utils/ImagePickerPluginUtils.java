@@ -43,7 +43,12 @@ public class ImagePickerPluginUtils {
   }
 
   public static ImagePickerPluginUtils getInstance(Activity activity) {
-    utils = new ImagePickerPluginUtils(activity);
+    if (utils == null) {
+      synchronized (ImagePickerPluginUtils.class) {
+        if (utils == null) utils = new ImagePickerPluginUtils(activity);
+      }
+    }
+    utils.mActivity = activity;
     return utils;
   }
 
