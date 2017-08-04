@@ -3,13 +3,11 @@ package com.wugang.jsbridge.library;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -68,7 +66,7 @@ public class BridgeWebView extends WebView {
   }
 
   public void loadUrl(final String url) {
-    if(!URLUtil.isJavaScriptUrl(url)){
+    if (!URLUtil.isJavaScriptUrl(url)) {
       jsCallJava.onInject(this);
     }
     initClient();
@@ -83,8 +81,7 @@ public class BridgeWebView extends WebView {
 
   @Override public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
     initClient();
-    if(!URLUtil.isJavaScriptUrl(url))
-      jsCallJava.onInject(this);
+    if (!URLUtil.isJavaScriptUrl(url)) jsCallJava.onInject(this);
     super.loadUrl(url, additionalHttpHeaders);
   }
 
@@ -101,34 +98,25 @@ public class BridgeWebView extends WebView {
     }
     if (bridgeChromeClient == null) this.setWebChromeClient(new WebChromeClient());
   }
+
   /**
-   * 解决WebView远程执行代码漏洞，避免被“getClass”方法恶意利用（在loadUrl之前调用，如：MyWebView(Context context, AttributeSet attrs)里面）；
+   * 解决WebView远程执行代码漏洞，避免被“getClass”方法恶意利用（在loadUrl之前调用，如：MyWebView(Context context, AttributeSet
+   * attrs)里面）；
    * 漏洞详解：http://drops.wooyun.org/papers/548
    * <p/>
    * function execute(cmdArgs)
    * {
-   *     for (var obj in window) {
-   *        if ("getClass" in window[obj]) {
-   *            alert(obj);
-   *            return ?window[obj].getClass().forName("java.lang.Runtime")
-   *                 .getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);
-   *        }
-   *     }
+   * for (var obj in window) {
+   * if ("getClass" in window[obj]) {
+   * alert(obj);
+   * return ?window[obj].getClass().forName("java.lang.Runtime")
+   * .getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);
    * }
-   *
-   * @return
+   * }
+   * }
    */
-  @TargetApi(11)
-  protected boolean removeSearchBoxJavaBridge() {
-    try {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
-          && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        Method method = this.getClass().getMethod("removeJavascriptInterface", String.class);
-        method.invoke(this, "searchBoxJavaBridge_");
-        return true;
-      }
-    } catch (Exception e) {
-    }
+  @TargetApi(11) protected boolean removeSearchBoxJavaBridge() {
+    removeJavascriptInterface("searchBoxJavaBridge_");
     return false;
   }
 }

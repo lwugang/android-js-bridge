@@ -27,7 +27,7 @@ public class ImagePickerPluginUtils {
 
   public static final String TOP_BAR_COLOR = "#cc22292c";
 
-  private final Activity mActivity;
+  private Activity mActivity;
 
   private rx.Observable observable;
   private Subscriber<? super String> subscriber;
@@ -104,5 +104,10 @@ public class ImagePickerPluginUtils {
       }
     });
     return observable;
+  }
+
+  public void destory(){
+    mActivity = null;
+    utils = null;
   }
 }
