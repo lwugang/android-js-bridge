@@ -32,8 +32,6 @@ public class ImagePickerPluginUtils {
   private rx.Observable observable;
   private Subscriber<? super String> subscriber;
 
-  private static ImagePickerPluginUtils utils;
-
   /**
    *
    * @param activity
@@ -43,13 +41,7 @@ public class ImagePickerPluginUtils {
   }
 
   public static ImagePickerPluginUtils getInstance(Activity activity) {
-    if (utils == null) {
-      synchronized (ImagePickerPluginUtils.class) {
-        if (utils == null) utils = new ImagePickerPluginUtils(activity);
-      }
-    }
-    utils.mActivity = activity;
-    return utils;
+    return new ImagePickerPluginUtils(activity);
   }
 
   /**
@@ -109,10 +101,5 @@ public class ImagePickerPluginUtils {
       }
     });
     return observable;
-  }
-
-  public void destory(){
-    mActivity = null;
-    utils = null;
   }
 }
