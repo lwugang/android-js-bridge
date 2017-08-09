@@ -55,6 +55,7 @@ public class BridgeChromeClient extends WebChromeClient {
     //  mIsInjectedJS = false;
     //}
     super.onProgressChanged(view, newProgress);
+    webChromeClient.onProgressChanged(view,newProgress);
   }
   //   ----------------需要处理的方法 end-------------------
 
