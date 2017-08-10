@@ -27,9 +27,6 @@ public class BridgeChromeClient extends WebChromeClient {
   private WebChromeClient webChromeClient;
 
   private JsCallJava mJsCallJava;
-  private boolean mIsInjectedJS;
-
-  private int reloadCount = 0;
 
   public BridgeChromeClient(WebChromeClient webChromeClient, JsCallJava mJsCallJava,
       WebView webView) {
@@ -40,20 +37,7 @@ public class BridgeChromeClient extends WebChromeClient {
   //   ----------------需要处理的方法 start-------------------
 
   @Override public void onProgressChanged(WebView view, int newProgress) {
-    //为什么要在这里注入JS
-    //1 OnPageStarted中注入有可能全局注入不成功，导致页面脚本上所有接口任何时候都不可用
-    //2 OnPageFinished中注入，虽然最后都会全局注入成功，但是完成时间有可能太晚，当页面在初始化调用接口函数时会等待时间过长
-    //3 在进度变化时注入，刚好可以在上面两个问题中得到一个折中处理
-    //为什么是进度大于25%才进行注入，因为从测试看来只有进度大于这个数字页面才真正得到框架刷新加载，保证100%注入成功
-    //BridgeWebView webView = (BridgeWebView) view;
-    //if (newProgress >= 5/*&&!webView.isLoadUrl*/) {
-      //if (!mIsInjectedJS) {
-        mJsCallJava.onInject(view);
-        //mIsInjectedJS = true;
-      //}
-    //} else {
-    //  mIsInjectedJS = false;
-    //}
+    mJsCallJava.onInject(view);
     super.onProgressChanged(view, newProgress);
     webChromeClient.onProgressChanged(view,newProgress);
   }
@@ -61,7 +45,7 @@ public class BridgeChromeClient extends WebChromeClient {
 
   @Override public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
       JsPromptResult result) {
-    return super.onJsPrompt(view, url, message, defaultValue, result);
+    return webChromeClient.onJsPrompt(view, url, message, defaultValue, result);
   }
 
   @Override public boolean onConsoleMessage(ConsoleMessage consoleMessage) {

@@ -27,8 +27,6 @@ public class BridgeWebViewClient extends WebViewClient {
 
   private JsCallJava mJsCallJava;
 
-  private boolean isLoadJs = false;
-
   public BridgeWebViewClient(WebViewClient webViewClient, JsCallJava mJsCallJava) {
     this.webViewClient = webViewClient;
     this.mJsCallJava = mJsCallJava;
@@ -56,23 +54,15 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override public void onLoadResource(WebView view, String url) {
     webViewClient.onLoadResource(view, url);
-    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+    if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
     ||url.contains(".png"))) {
-      isLoadJs = true;
       mJsCallJava.onInject(view);
     }
   }
 
 
   @Override public void onPageFinished(WebView view, String url) {
-    //Log.e("----", "onPageFinished: " );
-    //BridgeWebView webView = (BridgeWebView) view;
-    //if(webView.isLoadUrl) {
-    //  webView.isLoadUrl = false;
-    //}else{
-    //Log.e("--------", "onPageFinished: " );
-      mJsCallJava.onInject(view);
-    //}
+    mJsCallJava.onInject(view);
     webViewClient.onPageFinished(view, url);
   }
 
@@ -124,18 +114,16 @@ public class BridgeWebViewClient extends WebViewClient {
   @Override
   public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
     String url = request.getUrl().toString();
-    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+    if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
         ||url.contains(".png"))) {
-      isLoadJs = true;
       mJsCallJava.onInject(view);
     }
     return webViewClient.shouldInterceptRequest(view, request);
   }
 
   @Override public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-    if(!TextUtils.isEmpty(url)&&!isLoadJs&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
+    if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
         ||url.contains(".png"))) {
-      isLoadJs = true;
       mJsCallJava.onInject(view);
     }
     return webViewClient.shouldInterceptRequest(view, url);
