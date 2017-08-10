@@ -28,7 +28,7 @@ public class JsCallJava {
       + "            args.shift();\n"
       + "            \n"
       + "            for (var i = 0, l = args.length; i < l; i++){\n"
-      + "                args[i] = decodeURIComponent(args[i]);\n"
+      + "                args[i] = args[i];\n"
       + "            }\n"
       + "            \n"
       + "            var cb = EasyJS.__callbacks[cbID];\n"
