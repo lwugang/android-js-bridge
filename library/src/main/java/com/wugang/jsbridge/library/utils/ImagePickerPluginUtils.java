@@ -32,6 +32,7 @@ public class ImagePickerPluginUtils {
 
   private rx.Observable observable;
   private Subscriber<? super List<String>> subscriber;
+  private OnListener listener;
 
   /**
    *
@@ -43,6 +44,10 @@ public class ImagePickerPluginUtils {
 
   public static ImagePickerPluginUtils getInstance(Activity activity) {
     return new ImagePickerPluginUtils(activity);
+  }
+
+  public void setListener(OnListener listener) {
+    this.listener = listener;
   }
 
   /**
@@ -61,6 +66,7 @@ public class ImagePickerPluginUtils {
 
   public void onActivityResult(int requestCode, int resultCode, final Intent data) {
     if (ImagePicker.RESULT_CODE_ITEMS == resultCode) {
+      if(listener!=null) listener.onStart();
       Observable.create(new Observable.OnSubscribe<List<String>>() {
         @Override public void call(Subscriber<? super List<String>> subscriber) {
           try {
@@ -80,18 +86,22 @@ public class ImagePickerPluginUtils {
               subscriber.onNext(images);
             }
           } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            subscriber.onError(e);
+            if(listener!=null) listener.onError(e);
           } catch (IOException e) {
-            e.printStackTrace();
+            if(listener!=null) listener.onError(e);
+            subscriber.onError(e);
           }
         }
       }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<List<String>>() {
         @Override public void onCompleted() {
-
+          subscriber.onCompleted();
+          if(listener!=null) listener.onCompleted();
         }
 
         @Override public void onError(Throwable throwable) {
-
+          subscriber.onError(throwable);
+          if(listener!=null) listener.onError(throwable);
         }
 
         @Override public void onNext(List<String> strings) {
@@ -113,5 +123,11 @@ public class ImagePickerPluginUtils {
       }
     });
     return observable;
+  }
+
+  public interface OnListener{
+    void onStart();
+    void onError(Throwable e);
+    void onCompleted();
   }
 }
