@@ -106,6 +106,7 @@ public class ImagePickerPluginUtils {
 
         @Override public void onNext(List<String> strings) {
           subscriber.onNext(strings);
+          if(listener!=null) listener.onCompleted();
         }
       });
     }
