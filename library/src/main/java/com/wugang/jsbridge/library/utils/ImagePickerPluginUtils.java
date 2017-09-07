@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.util.Base64;
 import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.bean.ImageItem;
-import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.image.ImageSelectedActivity;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,6 +16,8 @@ import java.util.List;
 import net.bither.util.NativeUtil;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by lwg on 17-7-3.
@@ -30,7 +31,7 @@ public class ImagePickerPluginUtils {
   private Activity mActivity;
 
   private rx.Observable observable;
-  private Subscriber<? super String> subscriber;
+  private Subscriber<? super List<String>> subscriber;
 
   /**
    *
@@ -58,45 +59,56 @@ public class ImagePickerPluginUtils {
     NativeUtil.setDefaultMaxSize(defaultMaxSize);
   }
 
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+  public void onActivityResult(int requestCode, int resultCode, final Intent data) {
     if (ImagePicker.RESULT_CODE_ITEMS == resultCode) {
-      List<ImageItem> listpath =
-          (List<ImageItem>) data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS);
-      try {
-        if (listpath != null) {
-          final List<String> images = new ArrayList<>();
-          for (ImageItem imageItem : listpath) {
-            FileInputStream fis = new FileInputStream(imageItem.path);
-            Bitmap bitmap = BitmapFactory.decodeStream(fis);
-            String savePath = mActivity.getCacheDir().getPath() + "/" + imageItem.name;
-            NativeUtil.compressBitmap(bitmap, savePath);
-            fis = new FileInputStream(savePath);
-            String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
-            images.add(image);
+      Observable.create(new Observable.OnSubscribe<List<String>>() {
+        @Override public void call(Subscriber<? super List<String>> subscriber) {
+          try {
+            List<ImageItem> listpath =
+                (List<ImageItem>) data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS);
+            if (listpath != null) {
+              final List<String> images = new ArrayList<>();
+              for (ImageItem imageItem : listpath) {
+                FileInputStream fis = new FileInputStream(imageItem.path);
+                Bitmap bitmap = BitmapFactory.decodeStream(fis);
+                String savePath = mActivity.getCacheDir().getPath() + "/" + imageItem.name;
+                NativeUtil.compressBitmap(bitmap, savePath);
+                fis = new FileInputStream(savePath);
+                String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
+                images.add(image);
+              }
+              subscriber.onNext(images);
+            }
+          } catch (FileNotFoundException e) {
+            e.printStackTrace();
+          } catch (IOException e) {
+            e.printStackTrace();
           }
-          subscriber.onNext(images.get(0));
         }
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<List<String>>() {
+        @Override public void onCompleted() {
+
+        }
+
+        @Override public void onError(Throwable throwable) {
+
+        }
+
+        @Override public void onNext(List<String> strings) {
+          subscriber.onNext(strings);
+        }
+      });
     }
   }
 
   /**
    * 选择图片
    */
-  public Observable<String> onPicker(ImageLoader imageLoader) {
-    ImagePicker imagePicker = ImagePicker.getInstance();
-    imagePicker.setImageLoader(imageLoader);   //设置图片加载器
-    imagePicker.setShowCamera(true);  //显示拍照按钮
-    imagePicker.setMultiMode(false);
-    imagePicker.setCrop(false);
+  public Observable<List<String>> onPicker(ImagePicker imagePicker) {
     Intent intent = new Intent(mActivity, ImageSelectedActivity.class);
     mActivity.startActivityForResult(intent, 0);
-    observable = Observable.create(new Observable.OnSubscribe<String>() {
-      @Override public void call(Subscriber<? super String> subscriber) {
+    observable = Observable.create(new Observable.OnSubscribe<List<String>>() {
+      @Override public void call(Subscriber<? super List<String>> subscriber) {
         ImagePickerPluginUtils.this.subscriber = subscriber;
       }
     });
