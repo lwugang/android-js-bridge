@@ -117,6 +117,7 @@ public class ImagePickerPluginUtils {
    */
   public Observable<List<String>> onPicker(ImagePicker imagePicker) {
     Intent intent = new Intent(mActivity, ImageSelectedActivity.class);
+    intent.putExtra("IMAGES",imagePicker.getSelectedImages());
     mActivity.startActivityForResult(intent, 0);
     observable = Observable.create(new Observable.OnSubscribe<List<String>>() {
       @Override public void call(Subscriber<? super List<String>> subscriber) {
