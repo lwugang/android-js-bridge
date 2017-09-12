@@ -2,8 +2,8 @@ package com.wugang.jsbridge.library.image;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import com.lzy.imagepicker.ui.ImagePreviewActivity;
 import com.wugang.jsbridge.library.R;
@@ -23,9 +23,9 @@ public class MyImagePreviewActivity extends ImagePreviewActivity {
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topBar.getLayoutParams();
         params.topMargin = 0;
         topBar.setLayoutParams(params);
-        LinearLayout rl = (LinearLayout) findViewById(R.id.content);
-        rl.setFitsSystemWindows(true);
-        findViewById(R.id.top_bar).setBackgroundColor(
+        View view = findViewById(R.id.content);
+        view.setFitsSystemWindows(true);
+        topBar.setBackgroundColor(
             Color.parseColor(ImagePickerPluginUtils.TOP_BAR_COLOR));
     }
 }
