@@ -81,7 +81,7 @@ public class ImagePickerPluginUtils {
                 NativeUtil.compressBitmap(bitmap, savePath);
                 fis = new FileInputStream(savePath);
                 String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
-                images.add(imageItem.path+"$$"+image);
+                images.add(imageItem.path+"$$"+imageItem.addTime+"$$"+image);
               }
               subscriber.onNext(images);
             }
