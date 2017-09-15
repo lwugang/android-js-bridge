@@ -14,6 +14,7 @@ import net.bither.util.NativeUtil;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -26,6 +27,7 @@ public class ImagePickerPluginUtils {
   private Activity mActivity;
 
   private OnListener listener;
+  private Action1<List<String>> action1;
 
   /**
    *
@@ -55,6 +57,10 @@ public class ImagePickerPluginUtils {
    */
   public static void setDefaultMaxSize(int defaultMaxSize) {
     NativeUtil.setDefaultMaxSize(defaultMaxSize);
+  }
+
+  public void setPickerListener(Action1<List<String>> action1) {
+    this.action1 = action1;
   }
 
   public void onActivityResult(final List<ImageItem> listpath) {
@@ -97,10 +103,10 @@ public class ImagePickerPluginUtils {
 
           @Override public void onNext(List<String> strings) {
             if (listener != null) listener.onCompleted();
+            action1.call(strings);
           }
         });
   }
-
 
   public interface OnListener {
     void onStart();
