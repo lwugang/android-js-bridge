@@ -23,12 +23,8 @@ import rx.schedulers.Schedulers;
 
 public class ImagePickerPluginUtils {
 
-  public static final String TOP_BAR_COLOR = "#cc22292c";
-
   private Activity mActivity;
 
-  private rx.Observable observable;
-  private Subscriber<? super List<String>> subscriber;
   private OnListener listener;
 
   /**
@@ -92,17 +88,14 @@ public class ImagePickerPluginUtils {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<List<String>>() {
           @Override public void onCompleted() {
-            subscriber.onCompleted();
             if (listener != null) listener.onCompleted();
           }
 
           @Override public void onError(Throwable throwable) {
-            subscriber.onError(throwable);
             if (listener != null) listener.onError(throwable);
           }
 
           @Override public void onNext(List<String> strings) {
-            subscriber.onNext(strings);
             if (listener != null) listener.onCompleted();
           }
         });
