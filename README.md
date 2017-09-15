@@ -146,8 +146,8 @@ HTML&JS代码
 	###v0.0.2
 - #####加入图片浏览，图片默认处理成base64,并压缩 (使用图片浏览服务必须的依赖)
 ~~~gradle
- 	 compile 'com.lzy.widget:imagepicker:0.5.5'
-  	compile 'io.reactivex:rxjava:1.1.2'
+ 	 provided 'io.reactivex:rxjava:1.1.2'
+   provided 'io.reactivex:rxandroid:1.1.0'
 ~~~
 - #####修改注入方式，插件类中被注入的方法必须加上 @JsInject 注解标记
 ###v0.0.5

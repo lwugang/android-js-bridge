@@ -2,8 +2,5 @@
     package="com.wugang.jsbridge.library">
 
   <application>
-    <activity android:name=".image.ImageSelectedActivity"/>
-    <activity android:name=".image.ImageSelectedCropActivity"/>
-    <activity android:name=".image.MyImagePreviewActivity"/>
   </application>
 </manifest>

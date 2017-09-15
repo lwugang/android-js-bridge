@@ -1,13 +1,10 @@
 package com.wugang.jsbridge.library.utils;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
-import com.lzy.imagepicker.ImagePicker;
-import com.lzy.imagepicker.bean.ImageItem;
-import com.wugang.jsbridge.library.image.ImageSelectedActivity;
+import com.wugang.jsbridge.library.ImageItem;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -64,72 +61,59 @@ public class ImagePickerPluginUtils {
     NativeUtil.setDefaultMaxSize(defaultMaxSize);
   }
 
-  public void onActivityResult(int requestCode, int resultCode, final Intent data) {
-    if (ImagePicker.RESULT_CODE_ITEMS == resultCode) {
-      if(listener!=null) listener.onStart();
-      Observable.create(new Observable.OnSubscribe<List<String>>() {
-        @Override public void call(Subscriber<? super List<String>> subscriber) {
-          try {
-            List<ImageItem> listpath =
-                (List<ImageItem>) data.getSerializableExtra(ImagePicker.EXTRA_RESULT_ITEMS);
-            if (listpath != null) {
-              final List<String> images = new ArrayList<>();
-              for (ImageItem imageItem : listpath) {
-                FileInputStream fis = new FileInputStream(imageItem.path);
-                Bitmap bitmap = BitmapFactory.decodeStream(fis);
-                String savePath = mActivity.getCacheDir().getPath() + "/" + imageItem.name;
-                NativeUtil.compressBitmap(bitmap, savePath);
-                fis = new FileInputStream(savePath);
-                String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
-                images.add(imageItem.path+"$$"+imageItem.addTime+"$$"+image);
-              }
-              subscriber.onNext(images);
-            }
-          } catch (FileNotFoundException e) {
-            subscriber.onError(e);
-            if(listener!=null) listener.onError(e);
-          } catch (IOException e) {
-            if(listener!=null) listener.onError(e);
-            subscriber.onError(e);
-          }
-        }
-      }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<List<String>>() {
-        @Override public void onCompleted() {
-          subscriber.onCompleted();
-          if(listener!=null) listener.onCompleted();
-        }
-
-        @Override public void onError(Throwable throwable) {
-          subscriber.onError(throwable);
-          if(listener!=null) listener.onError(throwable);
-        }
-
-        @Override public void onNext(List<String> strings) {
-          subscriber.onNext(strings);
-          if(listener!=null) listener.onCompleted();
-        }
-      });
-    }
-  }
-
-  /**
-   * 选择图片
-   */
-  public Observable<List<String>> onPicker(ImagePicker imagePicker) {
-    Intent intent = new Intent(mActivity, ImageSelectedActivity.class);
-    intent.putExtra("IMAGES",imagePicker.getSelectedImages());
-    mActivity.startActivityForResult(intent, 0);
-    observable = Observable.create(new Observable.OnSubscribe<List<String>>() {
+  public void onActivityResult(final List<ImageItem> listpath) {
+    if (listener != null) listener.onStart();
+    Observable.create(new Observable.OnSubscribe<List<String>>() {
       @Override public void call(Subscriber<? super List<String>> subscriber) {
-        ImagePickerPluginUtils.this.subscriber = subscriber;
+        try {
+          if (listpath != null) {
+            final List<String> images = new ArrayList<>();
+            for (ImageItem imageItem : listpath) {
+              FileInputStream fis = new FileInputStream(imageItem.path);
+              Bitmap bitmap = BitmapFactory.decodeStream(fis);
+              String savePath = mActivity.getCacheDir().getPath() + "/" + imageItem.name;
+              NativeUtil.compressBitmap(bitmap, savePath);
+              fis = new FileInputStream(savePath);
+              String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
+              images.add(imageItem.path + "$$" + imageItem.addTime + "$$" + image);
+            }
+            subscriber.onNext(images);
+          }
+        } catch (FileNotFoundException e) {
+          subscriber.onError(e);
+          if (listener != null) listener.onError(e);
+        } catch (IOException e) {
+          if (listener != null) listener.onError(e);
+          subscriber.onError(e);
+        }
       }
-    });
-    return observable;
+    })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<List<String>>() {
+          @Override public void onCompleted() {
+            subscriber.onCompleted();
+            if (listener != null) listener.onCompleted();
+          }
+
+          @Override public void onError(Throwable throwable) {
+            subscriber.onError(throwable);
+            if (listener != null) listener.onError(throwable);
+          }
+
+          @Override public void onNext(List<String> strings) {
+            subscriber.onNext(strings);
+            if (listener != null) listener.onCompleted();
+          }
+        });
   }
 
-  public interface OnListener{
+
+  public interface OnListener {
     void onStart();
+
     void onError(Throwable e);
+
     void onCompleted();
   }
 }
