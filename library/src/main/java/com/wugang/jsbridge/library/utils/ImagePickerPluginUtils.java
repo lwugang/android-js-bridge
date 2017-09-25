@@ -45,19 +45,6 @@ public class ImagePickerPluginUtils {
     this.listener = listener;
   }
 
-  /**
-   * 设置压缩质量
-   */
-  public static void setDefaultQuality(int defaultQuality) {
-    NativeUtil.setDefaultQuality(defaultQuality);
-  }
-
-  /**
-   * 设置 压缩过后的图片大小
-   */
-  public static void setDefaultMaxSize(int defaultMaxSize) {
-    NativeUtil.setDefaultMaxSize(defaultMaxSize);
-  }
 
   public void setPickerListener(Action1<List<String>> action1) {
     this.action1 = action1;
