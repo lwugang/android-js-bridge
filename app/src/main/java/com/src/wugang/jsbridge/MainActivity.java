@@ -1,23 +1,19 @@
 package com.src.wugang.jsbridge;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
+import android.text.TextUtils;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.widget.Toast;
-import com.bumptech.glide.Glide;
-import com.lzy.imagepicker.loader.ImageLoader;
 import com.wugang.jsbridge.library.BridgeWebView;
 import com.wugang.jsbridge.library.JSFunction;
 import com.wugang.jsbridge.library.JsPlugin;
 import com.wugang.jsbridge.library.JsReturnValueCallback;
 import com.wugang.jsbridge.library.anno.JsInject;
 import com.wugang.jsbridge.library.utils.ImagePickerPluginUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
     webView.addJavascriptInterface(new A(), "android");
     webView.addJavascriptInterface(new B(), "ui");
+    syncCookie("file:///android_asset/test.html","token=123456");
+
     webView.loadUrl("file:///android_asset/test.html");
 
     //webView.loadUrl("http://192.168.10.217:1080/static/h5user",url,null);
@@ -36,9 +34,27 @@ public class MainActivity extends AppCompatActivity {
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
   }
 
+  /**
+   * 将cookie同步到WebView
+   * @param url WebView要加载的url
+   * @param cookie 要同步的cookie
+   * @return true 同步cookie成功，false同步cookie失败
+   * @Author JPH
+   */
+  public boolean syncCookie(String url,String cookie) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      CookieSyncManager.createInstance(getApplicationContext());
+    }
+    CookieManager cookieManager = CookieManager.getInstance();
+    cookieManager.setCookie(url, cookie);//如果没有特殊需求，这里只需要将session id以"key=value"形式作为cookie即可
+    String newCookie = cookieManager.getCookie(url);
+    CookieSyncManager.getInstance().sync();
+    return TextUtils.isEmpty(newCookie)?false:true;
+  }
+
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    imagePickerPlugin.onActivityResult(requestCode,resultCode,data);
+    //imagePickerPlugin.onActivityResult(requestCode,resultCode,data);
   }
 
   @JsInject
@@ -64,19 +80,19 @@ public class MainActivity extends AppCompatActivity {
 
     @JsInject("showImagePicker")
     public void test(String data,final JSFunction function) {
-      imagePickerPlugin.onPicker(new ImageLoader() {
-        @Override
-        public void displayImage(Activity activity, String s, ImageView imageView, int i, int i1) {
-          Glide.with(activity).load(s).into(imageView);
-        }
-
-        @Override public void clearMemoryCache() {
-
-        }}).subscribe(new Action1<String>() {
-        @Override public void call(String s) {
-          function.execute(s);
-        }
-      });
+      //imagePickerPlugin.onPicker(new ImageLoader() {
+      //  @Override
+      //  public void displayImage(Activity activity, String s, ImageView imageView, int i, int i1) {
+      //    Glide.with(activity).load(s).into(imageView);
+      //  }
+      //
+      //  @Override public void clearMemoryCache() {
+      //
+      //  }}).subscribe(new Action1<String>() {
+      //  @Override public void call(String s) {
+      //    function.execute(s);
+      //  }
+      //});
 
     }
   }

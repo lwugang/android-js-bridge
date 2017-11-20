@@ -131,6 +131,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void getVisitedHistory(ValueCallback<String[]> callback) {
+    mJsCallJava.onInject(webView);
     webChromeClient.getVisitedHistory(callback);
   }
 

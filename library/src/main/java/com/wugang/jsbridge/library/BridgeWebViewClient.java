@@ -130,6 +130,7 @@ public class BridgeWebViewClient extends WebViewClient {
   }
 
   @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+    mJsCallJava.onInject(view);
     webViewClient.doUpdateVisitedHistory(view, url, isReload);
   }
 
