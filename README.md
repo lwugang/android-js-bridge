@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.1.1'
+	    compile 'com.github.lwugang:android-js-bridge:v0.1.2'
 	}
 
 ~~~
@@ -144,11 +144,6 @@ HTML&JS代码
 ~~~
 ###版本历史
 	###v0.0.2
-- #####加入图片浏览，图片默认处理成base64,并压缩 (使用图片浏览服务必须的依赖)
-~~~gradle
- 	 provided 'io.reactivex:rxjava:1.1.2'
-   provided 'io.reactivex:rxandroid:1.1.0'
-~~~
 - #####修改注入方式，插件类中被注入的方法必须加上 @JsInject 注解标记
 ###v0.0.5
 - #####修改注入bug
