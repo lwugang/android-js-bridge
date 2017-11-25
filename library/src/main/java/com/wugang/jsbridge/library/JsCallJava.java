@@ -1,6 +1,8 @@
 package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -94,6 +96,8 @@ public class JsCallJava {
 
   private boolean isInject = false;
   private String string;
+
+  private Handler handler = new Handler(Looper.getMainLooper());
 
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
@@ -197,12 +201,11 @@ public class JsCallJava {
   }
 
   private void loadJs(final WebView view) {
-    view.postDelayed(new Runnable() {
+    handler.post(new Runnable() {
       @Override public void run() {
-        view.loadUrl("javascript:" + INJECT_JS);
-        view.loadUrl("javascript:" + string);
+        view.loadUrl("javascript:" + INJECT_JS+"\n"+string);
       }
-    }, 5);
+    });
   }
 
   public boolean isInject() {

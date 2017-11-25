@@ -31,14 +31,9 @@ public class BridgeWebViewClient extends WebViewClient {
     this.webViewClient = webViewClient;
     this.mJsCallJava = mJsCallJava;
   }
-  //   ----------------需要处理的方法 start-------------------
 
+  //   ----------------需要处理的方法 start-------------------
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
-    //BridgeWebView webView = (BridgeWebView) view;
-    //if(!webView.isLoadUrl){
-      mJsCallJava.onInject(view);
-    //}
-    //Log.e("----", "onPageStarted: " );
     webViewClient.onPageStarted(view, url, favicon);
   }
 

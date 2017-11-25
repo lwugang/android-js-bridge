@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -17,9 +16,6 @@ import java.util.Map;
 public class BridgeWebView extends WebView {
 
   private JsCallJava jsCallJava;
-
-  protected boolean isLoadUrl;//是否是通过loadUrl加载的
-
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
 
@@ -66,22 +62,17 @@ public class BridgeWebView extends WebView {
   }
 
   public void loadUrl(final String url) {
-    if (!URLUtil.isJavaScriptUrl(url)) {
-      jsCallJava.onInject(this);
-    }
     initClient();
     super.loadUrl(url);
   }
 
   @Override public void loadData(String data, String mimeType, String encoding) {
     initClient();
-    jsCallJava.onInject(this);
     super.loadData(data, mimeType, encoding);
   }
 
   @Override public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
     initClient();
-    if (!URLUtil.isJavaScriptUrl(url)) jsCallJava.onInject(this);
     super.loadUrl(url, additionalHttpHeaders);
   }
 

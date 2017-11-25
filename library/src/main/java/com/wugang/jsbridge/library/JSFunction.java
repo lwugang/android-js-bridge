@@ -1,5 +1,7 @@
 package com.wugang.jsbridge.library;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.WebView;
 
 /**
@@ -10,10 +12,9 @@ import android.webkit.WebView;
 public final class JSFunction {
   private String funcID;
   private WebView webView;
-  private boolean removeAfterExecute = true;
+  private boolean removeAfterExecute = false;
 
   public static final String INJECT_OBJ_NAME = "_callback";
-  public static final String CALLBACK_METHOD_NAME = "returnValue";
 
   //回调
   protected JsReturnValueCallback returnValueCallback;
@@ -37,7 +38,7 @@ public final class JSFunction {
    * 执行js函数
    */
   public void execute() {
-    execute(null,null);
+    execute(null, null);
   }
 
   /**
@@ -46,7 +47,7 @@ public final class JSFunction {
    * @param returnValueCallback js返回值回调
    */
   public void execute(JsReturnValueCallback returnValueCallback) {
-    execute(returnValueCallback,null);
+    execute(returnValueCallback, null);
   }
 
   /**
@@ -71,13 +72,15 @@ public final class JSFunction {
           sb.append(String.format(", '%s'", arg));
         }
       }
-      if (returnValueCallback != null) sb.append(")");
+      if (returnValueCallback != null) {
+        sb.append(")");
+      }
       sb.append(");");
-        webView.postDelayed(new Runnable() {
-          @Override public void run() {
-            webView.loadUrl("javascript:" + sb.toString());
-          }
-        }, 5);
+      new Handler(Looper.getMainLooper()).post(new Runnable() {
+        @Override public void run() {
+          webView.loadUrl("javascript:" + sb.toString());
+        }
+      });
     } catch (Exception e) {
       e.printStackTrace();
     }

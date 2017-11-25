@@ -38,7 +38,6 @@ public class BridgeChromeClient extends WebChromeClient {
 
   @Override public void onProgressChanged(WebView view, int newProgress) {
     mJsCallJava.onInject(view);
-    super.onProgressChanged(view, newProgress);
     webChromeClient.onProgressChanged(view,newProgress);
   }
   //   ----------------需要处理的方法 end-------------------
@@ -94,6 +93,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void onReceivedTitle(WebView view, String title) {
+    mJsCallJava.onInject(view);
     webChromeClient.onReceivedTitle(view, title);
   }
 
@@ -108,8 +108,6 @@ public class BridgeChromeClient extends WebChromeClient {
   @Override public boolean onJsTimeout() {
     return webChromeClient.onJsTimeout();
   }
-
-
 
   @Override public void onExceededDatabaseQuota(String url, String databaseIdentifier, long quota,
       long estimatedDatabaseSize, long totalQuota, WebStorage.QuotaUpdater quotaUpdater) {
