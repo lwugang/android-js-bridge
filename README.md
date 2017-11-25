@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.1.2'
+	    compile 'com.github.lwugang:android-js-bridge:v0.1.3'
 	}
 
 ~~~
@@ -149,7 +149,7 @@ HTML&JS代码
 - #####修改注入bug
 ###v0.1.1
 - #####修改注入bug保证100%注入成功
-###v0.1.2
+###v0.1.3
 - #####修改注入bug,优化注入，提高注入成功率,保证100%注入成功
 
 #Android7.0 webview 的一个坑(内部已处理)
