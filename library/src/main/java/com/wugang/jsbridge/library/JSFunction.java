@@ -1,7 +1,5 @@
 package com.wugang.jsbridge.library;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.webkit.WebView;
 
 /**
@@ -76,11 +74,7 @@ public final class JSFunction {
         sb.append(")");
       }
       sb.append(");");
-      new Handler(Looper.getMainLooper()).post(new Runnable() {
-        @Override public void run() {
-          webView.loadUrl("javascript:" + sb.toString());
-        }
-      });
+      webView.loadUrl("javascript:" + sb.toString());
     } catch (Exception e) {
       e.printStackTrace();
     }
