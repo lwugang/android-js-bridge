@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Add the dependency
 ~~~gradle
     dependencies {
-	    compile 'com.github.lwugang:android-js-bridge:v0.1.4'
+	    compile 'com.github.lwugang:android-js-bridge:v0.1.6'
 	}
 
 ~~~
@@ -151,6 +151,8 @@ HTML&JS代码
 - #####修改注入bug保证100%注入成功
 ###v0.1.4
 - #####修改注入bug,优化注入，提高注入成功率,保证100%注入成功
+###v0.1.6
+- #####修复bug，多个回调，生成的函数id重复造成多个函数执行同一个逻辑的问题
 
 #Android7.0 webview 的一个坑(内部已处理)
 ###Android7.0不会调用此方法

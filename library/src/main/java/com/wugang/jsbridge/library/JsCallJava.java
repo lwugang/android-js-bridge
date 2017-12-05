@@ -40,7 +40,7 @@ public class JsCallJava {
       + "            for (var i = 0, l = args.length; i < l; i++){\n"
       + "                if (typeof args[i] == \"function\"){\n"
       + "                    formattedArgs.push(\"f\");\n"
-      + "                    var cbID = \"__cb\" + (+new Date);\n"
+      + "                    var cbID = \"__cb\" + parseInt((+new Date)*Math.random()*Math.random()*Math.random());\n"
       + "                    EasyJS.__callbacks[cbID] = args[i];\n"
       + "                    formattedArgs.push(cbID);\n"
       + "                }else{\n"
@@ -168,7 +168,7 @@ public class JsCallJava {
     loadJs(view);
   }
 
-  /**
+  /**cbID
    * 查找需要注入的方法
    */
   List<Method> findInjectMethods(Object object) {
