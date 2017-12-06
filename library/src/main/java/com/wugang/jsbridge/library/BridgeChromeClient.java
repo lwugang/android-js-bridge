@@ -37,9 +37,9 @@ public class BridgeChromeClient extends WebChromeClient {
   //   ----------------需要处理的方法 start-------------------
 
   @Override public void onProgressChanged(WebView view, int newProgress) {
-    if(newProgress!=0) {
-      mJsCallJava.onInject(view);
-    }
+    //if(newProgress!=0) {
+    //  mJsCallJava.onInject(view);
+    //}
     webChromeClient.onProgressChanged(view,newProgress);
   }
   //   ----------------需要处理的方法 end-------------------
@@ -95,7 +95,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void onReceivedTitle(WebView view, String title) {
-    mJsCallJava.onInject(view);
+    //mJsCallJava.onInject(view);
     webChromeClient.onReceivedTitle(view, title);
   }
 
