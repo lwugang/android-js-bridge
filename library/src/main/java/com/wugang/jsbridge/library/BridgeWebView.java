@@ -62,6 +62,7 @@ public class BridgeWebView extends WebView {
   }
 
   public void loadUrl(final String url) {
+    jsCallJava.onInject(this);
     initClient();
     super.loadUrl(url);
   }
