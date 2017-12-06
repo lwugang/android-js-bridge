@@ -89,6 +89,8 @@ public class BridgeWebViewClient extends WebViewClient {
   }
 
 
+
+
   @Override public void onScaleChanged(WebView view, float oldScale, float newScale) {
     webViewClient.onScaleChanged(view, oldScale, newScale);
   }
