@@ -1,10 +1,9 @@
 package com.wugang.jsbridge.library;
 
 import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import com.wugang.jsbridge.library.anno.JsInject;
@@ -85,7 +84,8 @@ public class JsCallJava {
       + "    };\n"
       + "}";
   //过滤object对象的方法
-  public List<String> filterMethodNames= Arrays.asList("getClass","hashCode","equals","toString","notify","notifyAll","wait");
+  public List<String> filterMethodNames =
+      Arrays.asList("getClass", "hashCode", "equals", "toString", "notify", "notifyAll", "wait");
   //js注入对象
   public Map<String, Object> objectMap;
   //js 注入对象对应的方法列表
@@ -96,8 +96,6 @@ public class JsCallJava {
 
   private boolean isInject = false;
   private String string;
-
-  private Handler handler = new Handler(Looper.getMainLooper());
 
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
@@ -144,13 +142,12 @@ public class JsCallJava {
       for (int i = 0; i < methods.size(); i++) {
         JsInject jsInject = methods.get(i).getAnnotation(JsInject.class);
         String name = methods.get(i).getName();
-        if(filterMethodNames.contains(name)){
+        if (filterMethodNames.contains(name)) {
           continue;
         }
-        if(jsInject!=null) {
+        if (jsInject != null) {
           String tempName = jsInject.value();
-          if(!TextUtils.isEmpty(tempName))
-            name = tempName;
+          if (!TextUtils.isEmpty(tempName)) name = tempName;
         }
         temp.put(name, methods.get(i).getName());
         sb.append("\"");
@@ -168,7 +165,8 @@ public class JsCallJava {
     loadJs(view);
   }
 
-  /**cbID
+  /**
+   * cbID
    * 查找需要注入的方法
    */
   List<Method> findInjectMethods(Object object) {
@@ -185,7 +183,7 @@ public class JsCallJava {
       for (int i = 0; i < aClassMethods.length; i++) {
         Method aClassMethod = aClassMethods[i];
         if (isInjectClass) {
-          if(aClassMethod.getAnnotation(NoInject.class)==null) {
+          if (aClassMethod.getAnnotation(NoInject.class) == null) {
             methodList.add(aClassMethod);
           }
         } else {
@@ -201,11 +199,8 @@ public class JsCallJava {
   }
 
   private void loadJs(final WebView view) {
-    handler.post(new Runnable() {
-      @Override public void run() {
-        view.loadUrl("javascript:" + INJECT_JS+"\n"+string);
-      }
-    });
+    view.loadUrl("javascript:" + INJECT_JS + "\n" + string);
+    Log.d("loadJs", "loadJs: "+INJECT_JS+"\n"+string);
   }
 
   public boolean isInject() {
