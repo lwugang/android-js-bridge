@@ -1,5 +1,10 @@
 <html>
+<script src="file:///android_asset/test.js"></script>
     <script>
+
+
+        test2();
+
         function test(){
             ui.showImagePicker("showImagePicker",function(d){
                    alert(d)
@@ -18,16 +23,19 @@
             });
         }
         function getResult(){
-            console.log(document.cookie+"========");
+            console.log("22222"+LYUIHandle.getResult());
             <!--var result = android.getResult();-->
             <!--alert(result);-->
         }
     </script>
     <body>
+    <img src="http://img5.imgtn.bdimg.com/it/u=49366202,632101467&fm=27&gp=0.jpg"/>
         <button onclick="getResult()">getResult</button>
         <button onclick="testFun()">testFun</button>
         <button onclick="testFunReturn()">testFunReturn</button>
         <button onclick="test()">select img</button>
         <img src="" id="img01" width="400" height="400"/>
     </body>
+    <script src="https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/js/lib/jquery-1.10.2_d88366fd.js"></script>
+
 </html>

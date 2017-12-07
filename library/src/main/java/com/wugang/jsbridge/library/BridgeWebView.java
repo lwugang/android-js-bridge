@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -62,7 +63,9 @@ public class BridgeWebView extends WebView {
   }
 
   public void loadUrl(final String url) {
-    jsCallJava.onInject(this);
+    if(!URLUtil.isJavaScriptUrl(url)){
+      jsCallJava.onInject(this);
+    }
     initClient();
     super.loadUrl(url);
   }

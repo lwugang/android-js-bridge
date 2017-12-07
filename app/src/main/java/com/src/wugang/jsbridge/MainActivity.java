@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Toast;
@@ -23,9 +24,10 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     BridgeWebView webView = (BridgeWebView) findViewById(R.id.web_view);
-    webView.addJavascriptInterface(new A(), "android");
-    webView.addJavascriptInterface(new B(), "ui");
-    syncCookie("file:///android_asset/test.html","token=123456");
+    webView.addJavascriptInterface(new A(), "LYUIHandle");
+    webView.addJavascriptInterface(new B(), "LYRouterHandle");
+    webView.addJavascriptInterface(new B(), "LYUserHandle");
+    //syncCookie("file:///android_asset/test.html","token=123456");
 
     webView.loadUrl("file:///android_asset/test.html");
 
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     imagePickerPlugin = ImagePickerPluginUtils.getInstance(this);
   }
 
+  public void start(View v){
+    startActivity(new Intent(this,getClass()));
+  }
   /**
    * 将cookie同步到WebView
    * @param url WebView要加载的url
@@ -63,9 +68,11 @@ public class MainActivity extends AppCompatActivity {
     public String getResult() {
       return "getResult";
     }
+
     public void testFun(JSFunction jsFunction){
       jsFunction.execute("testFun");
     }
+
     @JsInject("ddd")
     public void testFunReturn(JSFunction jsFunction){
       jsFunction.execute(new JsReturnValueCallback() {
