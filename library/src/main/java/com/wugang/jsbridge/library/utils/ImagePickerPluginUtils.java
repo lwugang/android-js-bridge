@@ -10,12 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 import net.bither.util.NativeUtil;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by lwg on 17-7-3.
@@ -27,7 +23,7 @@ public class ImagePickerPluginUtils {
   private Activity mActivity;
 
   private OnListener listener;
-  private Action1<List<String>> action1;
+  private Action<List<String>> action;
 
   /**
    *
@@ -46,14 +42,14 @@ public class ImagePickerPluginUtils {
   }
 
 
-  public void setPickerListener(Action1<List<String>> action1) {
-    this.action1 = action1;
+  public void setPickerListener(Action<List<String>> action) {
+    this.action = action;
   }
 
   public void onActivityResult(final List<ImageItem> listpath) {
     if (listener != null) listener.onStart();
-    Observable.create(new Observable.OnSubscribe<List<String>>() {
-      @Override public void call(Subscriber<? super List<String>> subscriber) {
+    Executors.newSingleThreadExecutor().submit(new Runnable() {
+      @Override public void run() {
         try {
           if (listpath != null) {
             final List<String> images = new ArrayList<>();
@@ -66,33 +62,17 @@ public class ImagePickerPluginUtils {
               String image = Base64.encodeToString(FileUtils.stream2Byte(fis), Base64.DEFAULT);
               images.add(imageItem.path + "$$" + imageItem.addTime + "$$" + image);
             }
-            subscriber.onNext(images);
+            action.call(images);
+            if(listener!=null)
+              listener.onCompleted();
           }
         } catch (FileNotFoundException e) {
-          subscriber.onError(e);
           if (listener != null) listener.onError(e);
         } catch (IOException e) {
           if (listener != null) listener.onError(e);
-          subscriber.onError(e);
         }
       }
-    })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<List<String>>() {
-          @Override public void onCompleted() {
-            if (listener != null) listener.onCompleted();
-          }
-
-          @Override public void onError(Throwable throwable) {
-            if (listener != null) listener.onError(throwable);
-          }
-
-          @Override public void onNext(List<String> strings) {
-            if (listener != null) listener.onCompleted();
-            action1.call(strings);
-          }
-        });
+    });
   }
 
   public interface OnListener {
@@ -101,5 +81,10 @@ public class ImagePickerPluginUtils {
     void onError(Throwable e);
 
     void onCompleted();
+  }
+
+
+  public interface Action<T>{
+    void call(T t);
   }
 }
