@@ -1,11 +1,9 @@
 package com.wugang.jsbridge.library;
 
-import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import com.wugang.jsbridge.library.anno.JsInject;
@@ -20,13 +18,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JsCallJava implements IInject{
-  String INJECT_JS = "console.log('inject'+(+new Date));if(!window.EasyJS){\nconsole.log('injectsuccess'+(+new Date));"
+public class JsCallJava2 implements IInject {
+  String INJECT_JS = "if(!window.EasyJS){\n"
       + "    window.EasyJS = {\n"
       + "        __callbacks: {},\n"
       + "        \n"
       + "        invokeCallback: function (cbID, removeAfterExecute){\n"
-      + "            console.log(cbID+'---jsCalljava---invokeCallback------wwwwwww---');var args = Array.prototype.slice.call(arguments);\n"
+      + "            var args = Array.prototype.slice.call(arguments);\n"
       + "            args.shift();\n"
       + "            args.shift();"
       + "            var cb = EasyJS.__callbacks[cbID];\n"
@@ -37,7 +35,7 @@ public class JsCallJava implements IInject{
       + "        },\n"
       + "        \n"
       + "        call: function (obj, functionName, args){\n"
-      + "            console.log(obj+'---jsCalljava---call-------wwwwwww--');var formattedArgs = [];\n"
+      + "            var formattedArgs = [];\n"
       + "            for (var i = 0, l = args.length; i < l; i++){\n"
       + "                if (typeof args[i] == \"function\"){\n"
       + "                    formattedArgs.push(\"f\");\n"
@@ -67,15 +65,13 @@ public class JsCallJava implements IInject{
       + "        },\n"
       + "        \n"
       + "        inject: function (obj, methods){\n"
-      + "            console.log(obj+'--jsCalljava---inject----wwwwwww--'+'====='+window[obj]+'======'+(+new Date));if(typeof(window[obj])!='undefined')\n"
+      + "            if(typeof(window[obj])!='undefined')\n"
       + "                return;\n"
       + "            window[obj] = {};\n"
       + "            var jsObj = window[obj];\n"
-      + "            \n"
       + "            for (var i = 0, l = methods.length; i < l; i++){\n"
       + "                (function (){\n"
-      + "                    var"
-      + " method = methods[i];\n"
+      + "                    var method = methods[i];\n"
       + "                    var jsMethod = method.replace(new RegExp(\":\", \"g\"), \"\");\n"
       + "                    jsObj[jsMethod] = function (){\n"
       + "                        return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\n"
@@ -86,7 +82,8 @@ public class JsCallJava implements IInject{
       + "    };\n"
       + "}";
   //过滤object对象的方法
-  public List<String> filterMethodNames= Arrays.asList("getClass","hashCode","equals","toString","notify","notifyAll","wait");
+  public List<String> filterMethodNames =
+      Arrays.asList("getClass", "hashCode", "equals", "toString", "notify", "notifyAll", "wait");
   //js注入对象
   public Map<String, Object> objectMap;
   //js 注入对象对应的方法列表
@@ -100,6 +97,7 @@ public class JsCallJava implements IInject{
 
   private Handler handler = new Handler(Looper.getMainLooper());
 
+  @Override
   public void addJavascriptInterfaces(BridgeWebView bridgeWebView, Object obj, String name) {
     //预注入一个获取js返回值的对象
     bridgeWebView.addJavascriptInterface(this, JSFunction.INJECT_OBJ_NAME);
@@ -122,21 +120,20 @@ public class JsCallJava implements IInject{
     }
   }
 
-  @Override public String getInjectString() {
-    return INJECT_JS+string;
-  }
-
-  @SuppressLint("WrongConstant") public void inject(final WebView view) {
+  @Override public void inject(WebView view) {
     if (objectMap == null || objectMap.isEmpty()) return;
     if (isInject()) {
       loadJs(view);
       return;
     }
-    final StringBuilder sb = new StringBuilder();
+    String objectJs = "if(typeof(window.%s)=='undefined'){ window.%s = {";
+    String methodJs = "%s:function(){"
+        + " return EasyJS.call(\"%s\", \"%s\", Array.prototype.slice.call(arguments));},";
+    final StringBuilder objectSb = new StringBuilder();
+
     for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-      sb.append("EasyJS.inject('");
-      sb.append(entry.getKey());
-      sb.append("', [");
+
+      objectSb.append(String.format(objectJs, entry.getKey(), entry.getKey()));
 
       List<Method> methods = findInjectMethods(entry.getValue());
       if (methods.size() > 0 && objectMethodMap == null) {
@@ -146,34 +143,32 @@ public class JsCallJava implements IInject{
 
       objectMethodMap.put(entry.getValue(), temp);
 
+      final StringBuilder methodSb = new StringBuilder();
+
       for (int i = 0; i < methods.size(); i++) {
         JsInject jsInject = methods.get(i).getAnnotation(JsInject.class);
         String name = methods.get(i).getName();
-        if(filterMethodNames.contains(name)){
+        if (filterMethodNames.contains(name)) {
           continue;
         }
-        if(jsInject!=null) {
+        if (jsInject != null) {
           String tempName = jsInject.value();
-          if(!TextUtils.isEmpty(tempName))
-            name = tempName;
+          if (!TextUtils.isEmpty(tempName)) name = tempName;
         }
         temp.put(name, methods.get(i).getName());
-        sb.append("\"");
-        sb.append(name);
-        sb.append("\"");
-        sb.append(",");
+        methodSb.append(String.format(methodJs, name, entry.getKey(), name));
       }
-      if (methods.size() > 0) {
-        sb.deleteCharAt(sb.length() - 1);
-      }
-      sb.append("]);");
+      if (methodSb.length() > 0) methodSb.deleteCharAt(methodSb.length() - 1);
+      objectSb.append(methodSb);
+      objectSb.append("}}");
     }
-    string = sb.toString();
+    string = objectSb.toString();
     setInject(true);
     loadJs(view);
   }
 
-  /**cbID
+  /**
+   * cbID
    * 查找需要注入的方法
    */
   List<Method> findInjectMethods(Object object) {
@@ -190,7 +185,7 @@ public class JsCallJava implements IInject{
       for (int i = 0; i < aClassMethods.length; i++) {
         Method aClassMethod = aClassMethods[i];
         if (isInjectClass) {
-          if(aClassMethod.getAnnotation(NoInject.class)==null) {
+          if (aClassMethod.getAnnotation(NoInject.class) == null) {
             methodList.add(aClassMethod);
           }
         } else {
@@ -205,11 +200,14 @@ public class JsCallJava implements IInject{
     return methodList;
   }
 
+  @Override public String getInjectString() {
+    return INJECT_JS + "\n" + string;
+  }
+
   private void loadJs(final WebView view) {
     handler.post(new Runnable() {
       @Override public void run() {
-        Log.e("-----范德萨是大势发达的撒---", "run: "+string );
-        view.loadUrl("javascript:" + INJECT_JS+"\n"+string);
+        view.loadUrl("javascript:{" + INJECT_JS + "\n" + string + "}");
       }
     });
   }
@@ -270,12 +268,10 @@ public class JsCallJava implements IInject{
       throws InvocationTargetException, IllegalAccessException {
     Method[] declaredMethods = javaObj.getClass().getDeclaredMethods();
     methodName = objectMethodMap.get(javaObj).get(methodName);
+    if (methodName == null) return;
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
-      Class<?>[] parameterTypes = declaredMethods[i].getParameterTypes();
-      if (methodName != null
-          && methodName.equals(name)
-          && parameterTypes.length == objects.length) {
+      if (methodName != null && methodName.equals(name)) {
         declaredMethods[i].invoke(javaObj, getValueByType(declaredMethods[i], objects));
         return;
       }
@@ -285,6 +281,7 @@ public class JsCallJava implements IInject{
   private Object[] getValueByType(Method declaredMethod, Object[] objects) {
     Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
     List<Object> objectList = new ArrayList<>();
+
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> type = parameterTypes[i];
       if (type == int.class) {
@@ -297,6 +294,15 @@ public class JsCallJava implements IInject{
         objectList.add(Byte.parseByte(objects[i].toString()));
       } else if (type == long.class) {
         objectList.add(Long.parseLong(objects[i].toString()));
+      } else if (type.isArray()) {
+        if (type.getComponentType() == JSFunction.class) {
+          JSFunction[] jsFunctions = new JSFunction[objects.length-i];
+          System.arraycopy(objects, i,jsFunctions, 0,jsFunctions.length);
+          objectList.add(jsFunctions);
+        } else {
+          objectList.add(objects);
+        }
+        return objectList.toArray();
       } else {
         objectList.add(objects[i]);
       }

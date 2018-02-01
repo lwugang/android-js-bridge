@@ -16,9 +16,7 @@ allprojects {
     repositories {
         jcenter()
         maven { url 'https://www.jitpack.io' }
+        //下载各种support包
+        maven { url 'https://maven.google.com' }
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

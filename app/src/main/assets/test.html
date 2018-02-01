@@ -1,17 +1,27 @@
 <html>
-<script src="file:///android_asset/test.js"></script>
-    <script>
-
-
-        test2();
-
+<script>
+        <!--window.onload=function(){-->
+            <!--console.log("-&#45;&#45;你大爷 start-&#45;&#45;");-->
+            <!--LYUIHandle.testFun(function(s){-->
+                <!--console.log("-&#45;&#45;你大爷-&#45;&#45;");-->
+            <!--},function(){-->
+                <!--console.log("-&#45;&#45;你大爷2-&#45;&#45;");-->
+            <!--},function(){-->
+                <!--console.log("-&#45;&#45;你大爷3-&#45;&#45;");-->
+            <!--})-->
+        <!--}-->
         function test(){
-            ui.showImagePicker("showImagePicker",function(d){
-                   alert(d)
-                 //  document.getElementById('img01').src='data:image/png;base64,'+JSON.parse(d).images[0];
-            });
+            console.log("---test---");
+            LYUIHandle.testFun(function(s){
+                console.log("---你大爷---");
+            },function(){
+                console.log("---你大爷2---");
+            },function(){
+                console.log("---你大爷3---");
+            })
         }
         function testFun(){
+
             android.testFun(function(data){
                 alert(data);
             });
@@ -23,19 +33,25 @@
             });
         }
         function getResult(){
-            console.log("22222"+LYUIHandle.getResult());
+             console.log("----------ppppppppp---"+JSON.stringify(LYUIHandle));
+            console.log("-----"+LYUIHandle.testFun());
             <!--var result = android.getResult();-->
             <!--alert(result);-->
         }
-    </script>
-    <body>
-    <img src="http://img5.imgtn.bdimg.com/it/u=49366202,632101467&fm=27&gp=0.jpg"/>
-        <button onclick="getResult()">getResult</button>
-        <button onclick="testFun()">testFun</button>
-        <button onclick="testFunReturn()">testFunReturn</button>
-        <button onclick="test()">select img</button>
-        <img src="" id="img01" width="400" height="400"/>
-    </body>
-    <script src="https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/js/lib/jquery-1.10.2_d88366fd.js"></script>
+
+
+</script>
+<script src="test.js"></script>
+
+<body>
+<img src="http://img5.imgtn.bdimg.com/it/u=49366202,632101467&fm=27&gp=0.jpg"/>
+<button onclick="test22()">test22</button>
+<button onclick="getResult()">getResult</button>
+<button onclick="testFun()">testFun</button>
+<button onclick="testFunReturn()">testFunReturn</button>
+<button onclick="test()">select img</button>
+<img src="" id="img01" width="400" height="400"/>
+</body>
+<script src="https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/js/lib/jquery-1.10.2_d88366fd.js"></script>
 
 </html>

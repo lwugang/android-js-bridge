@@ -21,6 +21,7 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+
         mWebView = (WebView) findViewById(R.id.webview);
         mBtn = (Button) findViewById(R.id.btn);
 

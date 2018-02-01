@@ -26,20 +26,24 @@ public class BridgeChromeClient extends WebChromeClient {
   private final WebView webView;
   private WebChromeClient webChromeClient;
 
-  private JsCallJava mJsCallJava;
+  private IInject inject;
 
-  public BridgeChromeClient(WebChromeClient webChromeClient, JsCallJava mJsCallJava,
+  public BridgeChromeClient(WebChromeClient webChromeClient, IInject inject,
       WebView webView) {
     this.webChromeClient = webChromeClient;
-    this.mJsCallJava = mJsCallJava;
+    this.inject = inject;
     this.webView = webView;
   }
   //   ----------------需要处理的方法 start-------------------
 
   @Override public void onProgressChanged(WebView view, int newProgress) {
-    //if(newProgress!=0) {
-    //  mJsCallJava.onInject(view);
-    //}
+    if(newProgress > 0) {
+      view.onPause();
+      inject.inject(view);
+    }
+    if(newProgress>70){
+      view.onResume();
+    }
     webChromeClient.onProgressChanged(view,newProgress);
   }
   //   ----------------需要处理的方法 end-------------------
@@ -50,6 +54,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+    //inject.inject(webView);
     return webChromeClient.onConsoleMessage(consoleMessage);
   }
 
@@ -95,7 +100,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void onReceivedTitle(WebView view, String title) {
-    //mJsCallJava.onInject(view);
+    //inject.inject(view);
     webChromeClient.onReceivedTitle(view, title);
   }
 
@@ -131,7 +136,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void getVisitedHistory(ValueCallback<String[]> callback) {
-    //mJsCallJava.onInject(webView);
+    inject.inject(webView);
     webChromeClient.getVisitedHistory(callback);
   }
 
@@ -158,6 +163,7 @@ public class BridgeChromeClient extends WebChromeClient {
   }
 
   @Override public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+    //inject.inject(webView);
     webChromeClient.onConsoleMessage(message, lineNumber, sourceID);
   }
 }

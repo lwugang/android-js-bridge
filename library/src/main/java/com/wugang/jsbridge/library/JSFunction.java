@@ -36,16 +36,7 @@ public final class JSFunction {
    * 执行js函数
    */
   public void execute() {
-    execute(null, null);
-  }
-
-  /**
-   * 执行js函数
-   *
-   * @param returnValueCallback js返回值回调
-   */
-  public void execute(JsReturnValueCallback returnValueCallback) {
-    execute(returnValueCallback, null);
+    execute(null);
   }
 
   /**

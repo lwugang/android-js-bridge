@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 public class BridgeWebView extends WebView {
 
-  private JsCallJava jsCallJava;
+  private IInject iInject;
   private BridgeWebViewClient bridgeWebViewClient;
   private BridgeChromeClient bridgeChromeClient;
 
@@ -36,17 +35,17 @@ public class BridgeWebView extends WebView {
   }
 
   private void init() {
-    jsCallJava = new JsCallJava();
+    iInject = new JsCallJava2();
     removeSearchBoxJavaBridge();
     if (!getSettings().getJavaScriptEnabled()) getSettings().setJavaScriptEnabled(true);
   }
 
   @Override public void setWebViewClient(WebViewClient client) {
-    super.setWebViewClient(bridgeWebViewClient = new BridgeWebViewClient(client, jsCallJava));
+    super.setWebViewClient(bridgeWebViewClient = new BridgeWebViewClient(client, iInject));
   }
 
   @Override public void setWebChromeClient(WebChromeClient client) {
-    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, jsCallJava, this));
+    super.setWebChromeClient(bridgeChromeClient = new BridgeChromeClient(client, iInject, this));
   }
 
   /**
@@ -56,16 +55,16 @@ public class BridgeWebView extends WebView {
   @SuppressLint("JavascriptInterface") @Override public void addJavascriptInterface(Object object,
       String name) {
     if (object instanceof JsPlugin) {
-      jsCallJava.addJavascriptInterfaces(this, object, name);
+      iInject.addJavascriptInterfaces(this, object, name);
     } else {
       super.addJavascriptInterface(object, name);
     }
   }
 
   public void loadUrl(final String url) {
-    if(!URLUtil.isJavaScriptUrl(url)){
-      jsCallJava.onInject(this);
-    }
+    //if (!URLUtil.isJavaScriptUrl(url)) {
+    //  iInject.inject(this);
+    //}
     initClient();
     super.loadUrl(url);
   }

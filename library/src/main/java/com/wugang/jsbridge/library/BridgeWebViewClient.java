@@ -11,7 +11,6 @@ package com.wugang.jsbridge.library;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.webkit.ClientCertRequest;
 import android.webkit.HttpAuthHandler;
@@ -25,20 +24,21 @@ import android.webkit.WebViewClient;
 public class BridgeWebViewClient extends WebViewClient {
   private WebViewClient webViewClient;
 
-  private JsCallJava mJsCallJava;
+  private IInject iInject;
 
-  public BridgeWebViewClient(WebViewClient webViewClient, JsCallJava mJsCallJava) {
+  public BridgeWebViewClient(WebViewClient webViewClient, IInject iInject) {
     this.webViewClient = webViewClient;
-    this.mJsCallJava = mJsCallJava;
+    this.iInject = iInject;
   }
 
   //   ----------------需要处理的方法 start-------------------
   @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
+    //iInject.inject(view);
     webViewClient.onPageStarted(view, url, favicon);
   }
 
   @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-    if (mJsCallJava.shouldOverrideUrlLoading(view, url)) return true;
+    if (iInject.shouldOverrideUrlLoading(view, url)) return true;
     return webViewClient.shouldOverrideUrlLoading(view, url);
   }
   //   ----------------需要处理的方法 end-------------------
@@ -48,16 +48,13 @@ public class BridgeWebViewClient extends WebViewClient {
   }
 
   @Override public void onLoadResource(WebView view, String url) {
+    //iInject.inject(view);
     webViewClient.onLoadResource(view, url);
-    //if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
-    //||url.contains(".png"))) {
-    //  mJsCallJava.onInject(view);
-    //}
   }
 
 
   @Override public void onPageFinished(WebView view, String url) {
-    //mJsCallJava.onInject(view);
+    //iInject.inject(view);
     webViewClient.onPageFinished(view, url);
   }
 
@@ -89,8 +86,6 @@ public class BridgeWebViewClient extends WebViewClient {
   }
 
 
-
-
   @Override public void onScaleChanged(WebView view, float oldScale, float newScale) {
     webViewClient.onScaleChanged(view, oldScale, newScale);
   }
@@ -110,29 +105,22 @@ public class BridgeWebViewClient extends WebViewClient {
 
   @Override
   public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-    //String url = request.getUrl().toString();
-    //if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
-    //    ||url.contains(".png"))) {
-    //  mJsCallJava.onInject(view);
-    //}
+    //iInject.inject(view);
     return webViewClient.shouldInterceptRequest(view, request);
   }
 
   @Override public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-    //if(!TextUtils.isEmpty(url)&&(url.contains(".js")||url.contains(".css")||url.contains(".jpg")
-    //    ||url.contains(".png"))) {
-    //  mJsCallJava.onInject(view);
-    //}
+    //iInject.inject(view);
     return webViewClient.shouldInterceptRequest(view, url);
   }
 
   @Override public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
-    mJsCallJava.onInject(view);
+    //iInject.inject(view);
     webViewClient.doUpdateVisitedHistory(view, url, isReload);
   }
 
   @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-    if(mJsCallJava.shouldOverrideUrlLoading(view, request.getUrl().toString()))
+    if(iInject.shouldOverrideUrlLoading(view, request.getUrl().toString()))
       return true;
     return super.shouldOverrideUrlLoading(view, request);
   }

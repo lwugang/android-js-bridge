@@ -24,8 +24,5 @@ dependencies {
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:24.1.1'
   compile project(':library')
-  //compile 'com.github.lwugang:android-js-bridge:v0.0.4'
-  compile 'io.reactivex:rxjava:1.1.2'
-  compile 'com.github.bumptech.glide:glide:3.7.0'
-  compile 'com.google.code.gson:gson:2.8.1'
+//  annotationProcessor project(':js-bridge-compiler')
 }
