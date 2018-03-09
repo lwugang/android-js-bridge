@@ -27,6 +27,9 @@ public class JsCallJava2 implements IInject {
       + "            var args = Array.prototype.slice.call(arguments);\n"
       + "            args.shift();\n"
       + "            args.shift();"
+      + "for (var i = 0, l = args.length; i < l; i++){\n"
+      + "\t\t\targs[i] = decodeURIComponent(args[i]);\n"
+      + "\t\t}"
       + "            var cb = EasyJS.__callbacks[cbID];\n"
       + "            if (removeAfterExecute){\n"
       + "                EasyJS.__callbacks[cbID] = undefined;\n"
@@ -296,8 +299,8 @@ public class JsCallJava2 implements IInject {
         objectList.add(Long.parseLong(objects[i].toString()));
       } else if (type.isArray()) {
         if (type.getComponentType() == JSFunction.class) {
-          JSFunction[] jsFunctions = new JSFunction[objects.length-i];
-          System.arraycopy(objects, i,jsFunctions, 0,jsFunctions.length);
+          JSFunction[] jsFunctions = new JSFunction[objects.length - i];
+          System.arraycopy(objects, i, jsFunctions, 0, jsFunctions.length);
           objectList.add(jsFunctions);
         } else {
           objectList.add(objects);

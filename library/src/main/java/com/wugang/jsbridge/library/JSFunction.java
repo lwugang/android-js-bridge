@@ -1,8 +1,10 @@
 package com.wugang.jsbridge.library;
 
 import android.os.Build;
+import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+import java.net.URLEncoder;
 
 /**
  * Created by lwg on 17-6-29.
@@ -59,7 +61,7 @@ public final class JSFunction {
       if (params != null) {
         for (int i = 0, l = params.length; i < l; i++) {
           String arg = params[i];
-          //arg = URLEncoder.encode(arg, "UTF-8");
+          arg = URLEncoder.encode(arg, "UTF-8");
           sb.append(String.format(", '%s'", arg));
         }
       }
@@ -70,7 +72,7 @@ public final class JSFunction {
       if(Build.VERSION.SDK_INT>=19){
         webView.evaluateJavascript(sb.toString(), new ValueCallback<String>() {
           @Override public void onReceiveValue(String value) {
-
+            Log.e("----------", "onReceiveValue: "+value );
           }
         });
       }else {
