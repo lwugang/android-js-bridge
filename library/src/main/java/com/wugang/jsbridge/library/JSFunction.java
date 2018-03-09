@@ -1,5 +1,7 @@
 package com.wugang.jsbridge.library;
 
+import android.os.Build;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
 /**
@@ -65,7 +67,15 @@ public final class JSFunction {
         sb.append(")");
       }
       sb.append(");");
-      webView.loadUrl("javascript:" + sb.toString());
+      if(Build.VERSION.SDK_INT>=19){
+        webView.evaluateJavascript(sb.toString(), new ValueCallback<String>() {
+          @Override public void onReceiveValue(String value) {
+
+          }
+        });
+      }else {
+        webView.loadUrl("javascript:" + sb.toString());
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
