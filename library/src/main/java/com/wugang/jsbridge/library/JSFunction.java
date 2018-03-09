@@ -68,7 +68,7 @@ public final class JSFunction {
       }
       sb.append(");");
       if(Build.VERSION.SDK_INT>=19){
-        webView.evaluateJavascript(sb.toString(), new ValueCallback<String>() {
+        webView.evaluateJavascript("javascript:"+sb.toString(), new ValueCallback<String>() {
           @Override public void onReceiveValue(String value) {
 
           }
