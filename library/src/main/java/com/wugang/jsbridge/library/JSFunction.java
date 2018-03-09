@@ -61,7 +61,7 @@ public final class JSFunction {
       if (params != null) {
         for (int i = 0, l = params.length; i < l; i++) {
           String arg = params[i];
-          arg = URLEncoder.encode(arg, "UTF-8");
+          arg = URLEncoder.encode(arg);
           sb.append(String.format(", '%s'", arg));
         }
       }
