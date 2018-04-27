@@ -275,16 +275,18 @@ public class JsCallJava2 implements IInject {
     for (int i = 0; i < declaredMethods.length; i++) {
       String name = declaredMethods[i].getName();
       if (methodName != null && methodName.equals(name)) {
-        declaredMethods[i].invoke(javaObj, getValueByType(declaredMethods[i], objects));
+        Class<?>[] parameterTypes = declaredMethods[i].getParameterTypes();
+        int length = parameterTypes.length;
+        //如果方法声明的参数长度和 实际参数个数不想等
+        if (length != objects.length) continue;
+        declaredMethods[i].invoke(javaObj, getValueByType(parameterTypes, objects));
         return;
       }
     }
   }
 
-  private Object[] getValueByType(Method declaredMethod, Object[] objects) {
-    Class<?>[] parameterTypes = declaredMethod.getParameterTypes();
+  private Object[] getValueByType(Class<?>[] parameterTypes, Object[] objects) {
     List<Object> objectList = new ArrayList<>();
-
     for (int i = 0; i < parameterTypes.length; i++) {
       Class<?> type = parameterTypes[i];
       if (type == int.class) {
