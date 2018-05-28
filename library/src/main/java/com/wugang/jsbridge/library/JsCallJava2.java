@@ -28,7 +28,7 @@ public class JsCallJava2 implements IInject {
       + "            args.shift();\n"
       + "            args.shift();"
       + "for (var i = 0, l = args.length; i < l; i++){\n"
-      + "\t\t\targs[i] = decodeURIComponent(args[i]);\n"
+      + "\t\t\t/*args[i] = decodeURIComponent(args[i]);*/\n"
       + "\t\t}"
       + "            var cb = EasyJS.__callbacks[cbID];\n"
       + "            if (removeAfterExecute){\n"
